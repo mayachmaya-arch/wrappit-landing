@@ -1,0 +1,46 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-cream: #f8f4f3;
+  --color-ink: #1f2834;
+  --color-cloud: #f9fafb;
+  --color-pink: #fe7e83;
+  --color-purple: #6750a4;
+
+  --font-hebrew: 'Noto Sans Hebrew', system-ui, sans-serif;
+  --font-logo: 'Berkshire Swash', cursive;
+  /*
+   * "Reisinger - Michal" is a licensed display font used in the Figma file for the
+   * hero headline. It isn't available on Google Fonts, so it falls back to Noto
+   * Sans Hebrew Black. Add the licensed font file under src/assets/fonts and
+   * declare it in a @font-face block above to get the exact look — see README.
+   */
+  --font-display: 'Reisinger - Michal', 'Noto Sans Hebrew', system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-hebrew);
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee-scroll 34s linear infinite;
+}
