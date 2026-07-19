@@ -1,34 +1,34 @@
 import PhotoFrame from './PhotoFrame';
-import galleryPhoto from '../assets/images/gallery-photo.svg';
 
-const GRADIENTS = [
-  'from-amber-200 via-stone-300 to-stone-400',
-  'from-rose-200 via-stone-300 to-stone-400',
-  'from-emerald-200 via-stone-300 to-stone-400',
+// Plain /public paths — see README.md → "העלאת נכסים בעצמך".
+const GALLERY_PHOTOS = [
+  { src: '/images/gallery-photo-1.jpg', gradient: 'from-amber-200 via-stone-300 to-stone-400' },
+  { src: '/images/gallery-photo-2.jpg', gradient: 'from-rose-200 via-stone-300 to-stone-400' },
+  { src: '/images/gallery-photo-3.jpg', gradient: 'from-emerald-200 via-stone-300 to-stone-400' },
 ];
 
 function PhotoColumn({ offsetDown = false }) {
   return (
     <div className="grid grid-cols-2 gap-4 sm:gap-5">
       <div className={`flex flex-col gap-4 sm:gap-5 ${offsetDown ? 'mt-8' : ''}`}>
-        {GRADIENTS.map((gradient, i) => (
+        {GALLERY_PHOTOS.map((photo, i) => (
           <PhotoFrame
             key={`a-${i}`}
-            src={galleryPhoto}
+            src={photo.src}
             alt="מוצר מתנה מקומי"
-            gradient={gradient}
+            gradient={photo.gradient}
             rounded="rounded-3xl"
             className="aspect-[664/1072] w-full shadow-[20px_16px_20px_7px_rgba(0,0,0,0.25)]"
           />
         ))}
       </div>
       <div className={`flex flex-col gap-4 sm:gap-5 ${offsetDown ? '' : 'mt-8'}`}>
-        {GRADIENTS.map((gradient, i) => (
+        {GALLERY_PHOTOS.map((photo, i) => (
           <PhotoFrame
             key={`b-${i}`}
-            src={galleryPhoto}
+            src={photo.src}
             alt="מוצר מתנה מקומי"
-            gradient={gradient}
+            gradient={photo.gradient}
             rounded="rounded-3xl"
             className="aspect-[664/1072] w-full shadow-[20px_16px_20px_7px_rgba(0,0,0,0.25)]"
           />

@@ -1,9 +1,13 @@
 import PhotoFrame from './PhotoFrame';
-import businessPhoto1 from '../assets/images/business-photo-1.svg';
-import businessPhoto2 from '../assets/images/business-photo-2.svg';
-import businessPhoto3 from '../assets/images/business-photo-3.svg';
-import businessPhoto4 from '../assets/images/business-photo-4.svg';
-import buyerPhoto from '../assets/images/buyer-photo.svg';
+
+// Plain /public paths (not ES imports) — dropping a real photo in with the
+// exact same filename replaces the placeholder automatically, no code change.
+// See README.md → "העלאת נכסים בעצמך" for the full checklist.
+const businessPhoto1 = '/images/business-photo-1.jpg';
+const businessPhoto2 = '/images/business-photo-2.jpg';
+const businessPhoto3 = '/images/business-photo-3.jpg';
+const businessPhoto4 = '/images/business-photo-4.jpg';
+const buyerPhoto = '/images/buyer-photo.jpg';
 
 const BUYER_NOTES = [
   { text: 'שוברים את הראש', rotate: '-6deg', position: 'top-[6%] left-[8%]' },

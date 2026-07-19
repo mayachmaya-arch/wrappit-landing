@@ -24,18 +24,24 @@ npm run lint       # oxlint
 ## מבנה הפרויקט
 
 ```
+public/
+  images/                כל תמונות ה-placeholder (ראו "העלאת נכסים בעצמך")
+  videos/                וידאו הרקע של ה-Hero (placeholder — עדיין חסר, ראו מטה)
 src/
   components/
-    Header.jsx          נבר עליון: לוגו, ניווט, שתי כפתורי CTA
+    Header.jsx           נבר עליון: לוגו, ניווט, שתי כפתורי CTA
+    HeroBackground.jsx   וידאו הרקע של ה-Hero (autoplay/loop/muted) + poster fallback
     Hero.jsx             כותרת מתחלפת (יום הולדת? / בר מצווה? / ...) + תת-כותרת + CTA
     ProblemSection.jsx   "מצד אחד / מצד שני" — כאבי קוני מתנה מול בעלי עסקים
-    DarkGallery.jsx       הגלריה הכהה עם תצוגת מוצרים + מוקאפ טלפון
-    Marquee.jsx           הבאנר הסגול הנע עם רעיונות למתנה
-    PhotoFrame.jsx        עטיפת תמונה עם fallback גרדיאנט למקרה שהתמונה חסרה
-  assets/images/          כל התמונות (כרגע placeholder-ים, ראו מטה)
-  App.jsx                 הרכבת כל הסקשנים
-  index.css                טוקני עיצוב של Tailwind (צבעים, פונטים, אנימציית ה-marquee)
+    DarkGallery.jsx      הגלריה הכהה עם תצוגת מוצרים + מוקאפ טלפון
+    Marquee.jsx          הבאנר הסגול הנע עם רעיונות למתנה
+    PhotoFrame.jsx       עטיפת תמונה עם fallback גרדיאנט למקרה שהתמונה חסרה
+  assets/fonts/          פונט "Reisinger Michal" (ראו "העלאת נכסים בעצמך")
+  App.jsx                הרכבת כל הסקשנים
+  index.css              טוקני עיצוב של Tailwind (צבעים, פונטים, אנימציית ה-marquee, @font-face)
 ```
+
+**חשוב:** התמונות והווידאו נטענים דרך `public/` בנתיב מוחלט (`/images/...`, `/videos/...`), לא דרך `import` ב-JS. המשמעות: אין שום צורך לגעת בקוד כדי להחליף placeholder בקובץ אמיתי — מספיק להעלות קובץ עם אותו שם בדיוק לאותו נתיב, והוא ישתלב אוטומטית. פירוט מלא בסעיף הבא.
 
 ## RTL
 
@@ -45,6 +51,19 @@ src/
 
 - **כותרת מתחלפת (Hero)** — 5 הביטויים ("יום הולדת?", "בר מצווה?" וכו') מתחלפים כל 2.8 שניות עם fade, לפי הלוגיקה מ-Figma (היה מבוסס על ספריית `motion`, כאן מומש עם `useState`/`setInterval` + CSS transitions כדי לא להוסיף תלות מיותרת לעמוד סטטי).
 - **הבאנר הנע (Marquee)** — רשימת הרעיונות משוכפלת פעמיים ונעה ברצף אינסופי (`@keyframes marquee-scroll` ב-`index.css`), נטויה ב-2.7deg כמו במקור.
+- **וידאו רקע ה-Hero** — `<video autoPlay loop muted playsInline>` ב-`HeroBackground.jsx`, עם `poster` שמוצג עד שהווידאו נטען (וגם אם הוא אף פעם לא נטען — נפילה חלקה לתמונה סטטית). מכבד `prefers-reduced-motion` (עוצר את הניגון אוטומטית).
+
+## חשוב: על הווידאו ברקע ה-Hero — לא נמצא בקובץ ה-Figma
+
+בדקתי ספציפית בפיגמה (עם `get_motion_context` בצורה רקורסיבית על כל העמוד) אם יש אנימציה/וידאו/prototype כלשהו מוגדר לרקע ה-Hero. **התוצאה: אין.** ה-API של Figma שדרכו אני עובד מחזיר בדיוק שתי אנימציות מוגדרות בקובץ כולו — הכותרת המתחלפת והבאנר הנע — ושום דבר לרקע. גם `download_assets` על הפריים הזה מחזיר רק **2 קבצי PNG סטטיים** (לא MP4/GIF/וידאו), כנראה תמונה + שכבת גרדיאנט.
+
+כלומר: **אין לי שום קובץ וידאו לזהות או להצביע עליו** — לא כי נחסמתי, אלא כי הוא פשוט לא קיים בקובץ ה-Figma שאני רואה. יכול להיות שהוא:
+- קיים כ-prototype/אינטראקציה שה-API הזה לא חושף (למשל embed חיצוני, או Smart Animate שמוגדר על פריים שלא בדקתי),
+- או שהוא קובץ נפרד שעדיין לא הועלה ל-Figma בכלל.
+
+**מה שעשיתי בינתיים:** בניתי את `HeroBackground.jsx` מוכן לקבל וידאו אמיתי — `<video>` עם `poster` (תמונת ה-placeholder הנוכחית) שמוצג כברירת מחדל. ברגע שתעלו קובץ וידאו לנתיב הנכון (ראו טבלה למטה), הוא יתחיל לנגן אוטומטית בלופ, בלי לגעת בקוד.
+
+**מה אני צריך ממך:** קובץ MP4 (רצוי גם WebM נוסף לביצועים טובים יותר בדפדפנים שתומכים) — H.264, ללא סאונד (מוצג כ-`muted` בכל מקרה), יחס-רוחב-גובה דומה ל-16:10 (הפריים המקורי הוא 1980×1080), משך קצר שנראה טוב בלופ חלק (בדרך כלל 5-15 שניות). אם יש לך את קובץ המקור — פשוט תעלי אותו לנתיב `public/videos/hero-bg.mp4` (ואופציונלי גם `.webm`) בדיוק כמו בטבלה למטה.
 
 ## מה עוד חסר להשלמת העמוד
 
@@ -58,42 +77,41 @@ src/
 6. **SEO / מטא-דאטה מלאים** — יש `<title>` ו-`<meta description>` בסיסיים, אבל חסרים Open Graph, favicon אמיתי (יש רק placeholder), ו-`sitemap`.
 7. **נגישות** — כדאי מעבר נוסף על ניגודיות צבעים (טקסט cloud על תמונת הרקע בהירה מדי במקומות), ותיוג ARIA לכפתורי ניווט מתחלפים.
 
-## תמונות חסרות — placeholder-ים בשימוש
+## העלאת נכסים בעצמך — הוראות מדויקות
 
-**עדכון (19.7.2026) — ניסיתי שוב, זו מגבלת רשת אמיתית ולא בעיה ספציפית ל-Figma:**
+הסביבה שהריצה אותי לא מצליחה לגשת לאינטרנט החיצוני (בדקתי עם `curl`, `WebFetch`, וגם דרך כלי ה-Figma MCP עצמו — כולם נחסמים ב-`403` על ידי מדיניות ה-network של הסביבה). כל התמונות והפונט הם **placeholder-ים אמיתיים בפורמט הסופי** (JPG אמיתיים, לא SVG) — כדי שתוכלי פשוט **לדרוס כל קובץ באותו נתיב ואותו שם בדיוק**, בלי לגעת בקוד בכלל.
 
-בדקתי שוב עם 3 דרכים שונות:
-1. `curl` ישיר ל-`figma.com` → `403` על ה-`CONNECT` (נדחה ברמת ה-proxy הארגוני של הסביבה).
-2. כלי `WebFetch` (לא עובר דרך ה-sandbox curl, ניסיון עצמאי) → גם הוא קיבל `403 Forbidden` מאותו host.
-3. כלי ה-Figma MCP עצמו (`get_screenshot` עם `enableBase64Response`) **כן הצליח** לשלוף תמונה בפועל בצד השרת — ראיתי בעיניים את תמונת ה"קוני מתנה" (האישה על הספה עם הטלפון, node `1006:5789`) ברזולוציה מלאה. **אבל** אין לי דרך לשמור את ה-bytes האלה לדיסק: אין כלי שכותב קובץ מתוכן base64 שמגיע כ-attachment בתגובת כלי, וה-URL החלופי שהכלי מחזיר (`www.figma.com/api/mcp/asset/...`) חוזר לאותו host חסום מסעיף 1.
+הכלל: שם הקובץ + הסיומת + הנתיב חייבים להיות **בדיוק** כמו בטבלה. אם תשמרי עם סיומת אחרת (למשל `.png` במקום `.jpg`) — צריך גם לעדכן את השם בקוד, אז עדיף להמיר לסיומת המבוקשת לפני ההעלאה.
 
-המסקנה: זו לא באגיה שאפשר לעקוף — כל מדיניות ה-egress של הסביבה חוסמת בקשות החוצה ל-hosts כלליים (כולל `figma.com` וגם `hafontia.com` שביקשת עבור הפונט, ראו בהמשך). לכן כל התמונות בעמוד עדיין **placeholder-ים גרדיאנט שנוצרו מקומית** (`src/assets/images/*.svg`), לא צילומים אמיתיים — צריך להוריד אותן מהדפדפן שלכם (שם אין את המגבלה הזו).
+### תמונות ווידאו (בתיקיית `public/`, מוגשים כקבצים סטטיים בנתיב מוחלט)
 
-כדי להשלים עם התמונות האמיתיות מה-Figma: פתחו את קובץ ה-Figma בדפדפן שלכם והורידו כל נכס (או השתמשו בקישורים הזמניים למטה — **תקפים כשבוע בלבד מ-18.7.2026, כלומר בערך עד 25.7.2026**; אחרי זה יש לייצא מחדש מ-Figma):
+| # | שימוש בעמוד | נתיב מדויק להעלאה | Figma asset (זמני, תקף עד ~25.7.2026) |
+|---|---|---|---|
+| 1 | וידאו רקע ה-Hero (**חסר לגמרי — ראו הסבר למעלה, אין לי מקור לזה**) | `public/videos/hero-bg.mp4` (+ אופציונלי `public/videos/hero-bg.webm`) | אין — לא קיים בקובץ ה-Figma, את/ה צריכה לספק |
+| 2 | Poster/fallback לווידאו (frame סטטי, מוצג עד שהווידאו עולה) | `public/images/hero-bg.jpg` | [9a0b4743](https://www.figma.com/api/mcp/asset/9a0b4743-50d4-4b01-8ce9-0133f0891cc7) + [a899b4ca](https://www.figma.com/api/mcp/asset/a899b4ca-1cff-422c-b73f-60ed4aba732e) (תמונה + שכבת גרדיאנט) |
+| 3 | תמונת "קוני מתנה" (מצד אחד) | `public/images/buyer-photo.jpg` | [d8724e45](https://www.figma.com/api/mcp/asset/d8724e45-c5c7-4205-9f91-9b9a3a0cf66a) — זו התמונה שראיתי דרך `get_screenshot`, node `1006:5789` |
+| 4 | תמונת עסק #1 (מצד שני) | `public/images/business-photo-1.jpg` | [13282ae1](https://www.figma.com/api/mcp/asset/13282ae1-2cf8-4873-b162-f1c13e54c402) |
+| 5 | תמונת עסק #2 | `public/images/business-photo-2.jpg` | [d7823d47](https://www.figma.com/api/mcp/asset/d7823d47-0490-4dff-b767-6fc387130335) |
+| 6 | תמונת עסק #3 | `public/images/business-photo-3.jpg` | [66bcb6d6](https://www.figma.com/api/mcp/asset/66bcb6d6-8108-43f2-a85f-975c12967cf1) |
+| 7 | תמונת עסק #4 | `public/images/business-photo-4.jpg` | [ab067fd6](https://www.figma.com/api/mcp/asset/ab067fd6-3623-4f65-8c42-fb7411ad5829) |
+| 8 | כרטיס מוצר #1 בגלריה הכהה | `public/images/gallery-photo-1.jpg` | [57ce50c5](https://www.figma.com/api/mcp/asset/57ce50c5-98e9-4392-96ad-ae79b7f703a4) |
+| 9 | כרטיס מוצר #2 בגלריה הכהה | `public/images/gallery-photo-2.jpg` | חלופה מהקובץ: [9a949bd8](https://www.figma.com/api/mcp/asset/9a949bd8-a559-4617-8bf1-ec6127cf7d09) |
+| 10 | כרטיס מוצר #3 בגלריה הכהה | `public/images/gallery-photo-3.jpg` | חלופה מהקובץ: [b29dd75f](https://www.figma.com/api/mcp/asset/b29dd75f-a8ad-4c0d-a836-ae458947911e) |
 
-| שימוש בעמוד | קובץ יעד | Figma asset |
-|---|---|---|
-| רקע ה-Hero (רחוב + יד מושיטה מתנה) | `src/assets/images/hero-bg.svg`→`.jpg` | [9a0b4743](https://www.figma.com/api/mcp/asset/9a0b4743-50d4-4b01-8ce9-0133f0891cc7) + [a899b4ca](https://www.figma.com/api/mcp/asset/a899b4ca-1cff-422c-b73f-60ed4aba732e) (שתי שכבות — תמונה + גרדיאנט) |
-| תמונת "קוני מתנה" (מצד אחד) | `src/assets/images/buyer-photo.svg`→`.jpg` | [d8724e45](https://www.figma.com/api/mcp/asset/d8724e45-c5c7-4205-9f91-9b9a3a0cf66a) (יד מושיטה מתנה עטופה) |
-| תמונות "בעלי עסקים" (מצד שני), 4 כרטיסים | `business-photo-1..4.svg`→`.jpg` | [13282ae1](https://www.figma.com/api/mcp/asset/13282ae1-2cf8-4873-b162-f1c13e54c402), [d7823d47](https://www.figma.com/api/mcp/asset/d7823d47-0490-4dff-b767-6fc387130335), [66bcb6d6](https://www.figma.com/api/mcp/asset/66bcb6d6-8108-43f2-a85f-975c12967cf1), [ab067fd6](https://www.figma.com/api/mcp/asset/ab067fd6-3623-4f65-8c42-fb7411ad5829) (יש עוד כמה חלופות בקובץ המקור: `9a949bd8`, `b29dd75f`, `73a4a28e`, `4064f8e0`) |
-| כרטיסי המוצרים בגלריה הכהה | `gallery-photo.svg`→`.jpg` (משמש שוב ושוב — כדאי 6 תמונות שונות) | [57ce50c5](https://www.figma.com/api/mcp/asset/57ce50c5-98e9-4392-96ad-ae79b7f703a4) |
-| אייקון מתנה בבאנר הנע | מומש כ-SVG inline ב-`Marquee.jsx` (לא מיובא מ-Figma, כדי לא להעתיק אייקון קנייני `solar:gift-bold`) | [5833b2b3](https://www.figma.com/api/mcp/asset/5833b2b3-9159-4f8a-ba41-914289c6b1ff) אם רוצים את המקור המדויק |
+אייקון המתנה בבאנר הנע **לא** מיובא מ-Figma — מומש כ-SVG inline ב-`Marquee.jsx` כדי לא להעתיק אייקון קנייני (`solar:gift-bold`). אם רוצה בכל זאת את המקור המדויק: [5833b2b3](https://www.figma.com/api/mcp/asset/5833b2b3-9159-4f8a-ba41-914289c6b1ff).
 
-לאחר הורדת קובץ אמיתי, פשוט שימו אותו תחת אותו שם (או עדכנו את שם הקובץ בקומפוננטה הרלוונטית) — הרכיב `PhotoFrame` כבר בנוי כך שאם התמונה קיימת היא תחליף את הגרדיאנט אוטומטית.
+### פונט (בתיקיית `src/assets/fonts/`)
 
-## גופנים
+כותרת ה-Hero משתמשת בפונט **"Reisinger Michal"** (מיכל) — פונט חינמי בקוד פתוח מפרויקט המורשת של דן ריזינגר עם הספרייה הלאומית. `src/index.css` כבר מכיל בלוק `@font-face` מלא (טעינה מקומית, לא Google Fonts) שמצפה לאחד מהנתיבים הבאים (מספיק קובץ אחד, לא צריך את כולם):
 
-- **Noto Sans Hebrew** (משקלים 300/400/600/700/900) ו-**Berkshire Swash** (ללוגו "Wrappit") נטענים מ-Google Fonts דרך `index.html`.
-- כותרת ה-Hero משתמשת בפונט **"Reisinger Michal"** (מיכל) — פונט חינמי בקוד פתוח מפרויקט המורשת של דן ריזינגר עם הספרייה הלאומית. `src/index.css` כבר מכיל את בלוק ה-`@font-face` המלא (לא Google Fonts, טעינה מקומית) שמצפה לקבצים בנתיב:
-  ```
-  src/assets/fonts/Reisinger-Michal.woff2   (עדיף, הכי קטן במשקל)
-  src/assets/fonts/Reisinger-Michal.woff
-  src/assets/fonts/Reisinger-Michal.otf
-  src/assets/fonts/Reisinger-Michal.ttf
-  ```
-  **לא הצלחתי להוריד את הקובץ בעצמי:** ניסיתי גם עם `curl` וגם עם `WebFetch` ישירות מ-`https://reisinger.hafontia.com/wp-content/uploads/2024/06/Reisinger-Michal.zip` וקיבלתי `403 Forbidden` משתי הדרכים — אותה מדיניות רשת שחוסמת גישה ל-`figma.com` (ראו סעיף התמונות למעלה) חוסמת גם את ה-host הזה. אין בסביבה הזו שום דרך לעקוף את זה.
+| עדיפות | נתיב מדויק להעלאה |
+|---|---|
+| 1 (הכי קטן במשקל) | `src/assets/fonts/Reisinger-Michal.woff2` |
+| 2 | `src/assets/fonts/Reisinger-Michal.woff` |
+| 3 | `src/assets/fonts/Reisinger-Michal.otf` |
+| 4 | `src/assets/fonts/Reisinger-Michal.ttf` |
 
-  **מה שצריך לעשות:** תורידו את ה-zip מהקישור בדפדפן שלכם, תחלצו אותו, ותשימו את קובץ הפונט (כנראה `.otf` או `.ttf` בתוך ה-zip — יתכן שם קובץ אחר כמו `Michal-Reisinger.otf`) בנתיב אחד או יותר מהנ"ל, בדיוק עם השם `Reisinger-Michal.<סיומת>`. ברגע שהקובץ קיים, `@font-face` כבר יטען אותו אוטומטית — אין צורך לשנות קוד. עד אז יש נפילה חלקה (`fallback`) ל-Noto Sans Hebrew Black שנראית טוב וקרובה מספיק ברוב הגדלים.
+מקור: `https://reisinger.hafontia.com/wp-content/uploads/2024/06/Reisinger-Michal.zip` (ניסיתי להוריד גם `curl` וגם `WebFetch` — שניהם קיבלו `403` מאותה מדיניות רשת). תורידי את ה-zip, תחלצי אותו, ותשני את שם קובץ הפונט בתוכו (יתכן שהוא נקרא משהו כמו `Michal-Reisinger.otf`) בדיוק לאחד מהשמות בטבלה. ברגע שהקובץ קיים בנתיב הנכון, ה-`@font-face` יטען אותו אוטומטית — אין צורך לשנות שום קוד. עד אז יש נפילה חלקה ל-Noto Sans Hebrew Black.
 
 ## פריסה (Deployment)
 
