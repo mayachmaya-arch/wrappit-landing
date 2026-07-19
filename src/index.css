@@ -1,5 +1,25 @@
 @import 'tailwindcss';
 
+/*
+ * Reisinger Michal — free/open-source Hebrew display font (Dan Reisinger
+ * heritage project, with the National Library of Israel). Served locally,
+ * not from Google Fonts. Drop the extracted font file(s) into
+ * src/assets/fonts/ using these exact names — see README "פונטים" for the
+ * download link — and this block picks them up automatically. Until then,
+ * the browser falls back to Noto Sans Hebrew Black.
+ */
+@font-face {
+  font-family: 'Reisinger Michal';
+  src:
+    url('./assets/fonts/Reisinger-Michal.woff2') format('woff2'),
+    url('./assets/fonts/Reisinger-Michal.woff') format('woff'),
+    url('./assets/fonts/Reisinger-Michal.otf') format('opentype'),
+    url('./assets/fonts/Reisinger-Michal.ttf') format('truetype');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --color-cream: #f8f4f3;
   --color-ink: #1f2834;
@@ -9,13 +29,7 @@
 
   --font-hebrew: 'Noto Sans Hebrew', system-ui, sans-serif;
   --font-logo: 'Berkshire Swash', cursive;
-  /*
-   * "Reisinger - Michal" is a licensed display font used in the Figma file for the
-   * hero headline. It isn't available on Google Fonts, so it falls back to Noto
-   * Sans Hebrew Black. Add the licensed font file under src/assets/fonts and
-   * declare it in a @font-face block above to get the exact look — see README.
-   */
-  --font-display: 'Reisinger - Michal', 'Noto Sans Hebrew', system-ui, sans-serif;
+  --font-display: 'Reisinger Michal', 'Noto Sans Hebrew', system-ui, sans-serif;
 }
 
 html {
