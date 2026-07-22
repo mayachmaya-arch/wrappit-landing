@@ -43,21 +43,22 @@ const LOOP_ITEMS = [...GIFT_IDEAS, ...GIFT_IDEAS];
 
 export default function Marquee() {
   return (
-    <section
+    // The purple background lives here, on this stationary band — never on the
+    // moving track. Previously bg-purple was on the animated element itself:
+    // since that element's own width is finite (even duplicated), translating
+    // it eventually slides its trailing edge past the viewport, exposing
+    // whatever sits behind (no purple) before the loop resets — a real gap
+    // during playback, not just at rest. A band that never moves, sized once
+    // to 120vw, is always fully purple; only the content inside it slides.
+    <div
       aria-label="רעיונות למתנה"
-      className="relative -my-8 overflow-hidden py-6 sm:-my-10 sm:py-10 lg:-my-16"
+      className="absolute bottom-0 left-[-10vw] w-[120vw] -rotate-[2.7deg] overflow-hidden bg-purple py-6 sm:py-10 lg:py-16"
     >
-      <div className="-mx-[10%] w-[120%] -rotate-[2.7deg]">
-        {/* Extra vertical padding at lg+ so the rotated band's own height comfortably
-            outgrows the corner recession caused by rotating such a wide, shallow strip
-            (recession grows with viewport width) — eliminates the gaps that otherwise
-            appear at the top-left/bottom-right corners on wide desktop screens. */}
-        <div className="flex w-max animate-marquee items-center bg-purple py-6 sm:py-10 lg:py-16">
-          {LOOP_ITEMS.map((idea, i) => (
-            <MarqueeItem key={i} idea={idea} ariaHidden={i >= GIFT_IDEAS.length} />
-          ))}
-        </div>
+      <div className="flex w-max animate-marquee items-center">
+        {LOOP_ITEMS.map((idea, i) => (
+          <MarqueeItem key={i} idea={idea} ariaHidden={i >= GIFT_IDEAS.length} />
+        ))}
       </div>
-    </section>
+    </div>
   );
 }

@@ -11,16 +11,22 @@ import Footer from './components/Footer';
 function App() {
   return (
     <div dir="rtl" className="min-h-screen overflow-x-hidden bg-cream text-ink">
-      <div className="relative overflow-hidden bg-ink">
+      {/* hero-viewport: min-height:100svh at lg+ only, so the hero fills the
+          initial viewport on desktop while mobile keeps its content-driven
+          height. overflow-x-hidden (not overflow-hidden) so the ticker's
+          rotated band can bleed past the hero's bottom edge without being
+          clipped, while the video/gradient — always bounded to inset-0 —
+          are unaffected. */}
+      <div className="hero-viewport relative flex flex-col overflow-x-hidden bg-ink">
         <HeroBackground />
         <div className="absolute inset-0 bg-gradient-to-l from-ink/10 via-ink/40 to-ink/70" />
-        <div className="relative mx-auto flex max-w-[1820px] flex-col px-4 pt-4 sm:px-8 sm:pt-6">
+        <div className="relative z-10 mx-auto flex w-full max-w-[1820px] flex-1 flex-col px-4 pt-4 sm:px-8 sm:pt-6">
           <Header />
           <Hero />
         </div>
+        <Marquee />
       </div>
 
-      <Marquee />
       <ProblemSection />
       <GiftCollage />
       <HowItWorks />

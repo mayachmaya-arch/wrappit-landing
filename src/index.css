@@ -46,6 +46,17 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Full initial-viewport hero at desktop widths. svh (with a vh fallback for
+   browsers that don't support it) avoids the address-bar resize jump that
+   plain vh causes on mobile, which is exactly why this is scoped to desktop
+   only — mobile keeps its existing content-driven height. */
+@media (min-width: 1024px) {
+  .hero-viewport {
+    min-height: 100vh;
+    min-height: 100svh;
+  }
+}
+
 @keyframes marquee-scroll {
   from {
     transform: translateX(0);
