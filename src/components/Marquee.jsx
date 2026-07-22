@@ -23,26 +23,39 @@ function GiftIcon() {
   );
 }
 
-function MarqueeRow({ ariaHidden = false }) {
+function MarqueeItem({ idea, ariaHidden = false }) {
   return (
-    <div className="flex shrink-0 items-center gap-8 px-4" aria-hidden={ariaHidden}>
-      {GIFT_IDEAS.map((idea, i) => (
-        <span key={i} className="flex shrink-0 items-center gap-8">
-          <span className="text-2xl font-black whitespace-nowrap text-cloud sm:text-3xl">{idea}</span>
-          <GiftIcon />
-        </span>
-      ))}
-    </div>
+    <span className="me-8 flex shrink-0 items-center gap-8" aria-hidden={ariaHidden}>
+      <span className="text-2xl font-black whitespace-nowrap text-cloud sm:text-3xl">{idea}</span>
+      <GiftIcon />
+    </span>
   );
 }
 
+// Rendered twice back-to-back. Each item owns its own trailing spacing (`me-8`
+// per item, no container `gap`) instead of a flex `gap` between items — a flex
+// `gap` doesn't add space after the last child, so the seam between the two
+// copies would be half a gap narrower than every other gap, and translateX(-50%)
+// would land 16px short of the true repeat distance (a visible hitch once a
+// loop). With every item's spacing identical including the seam, one copy's
+// width is exactly half the track, so -50% is a perfect, jump-free loop point.
+const LOOP_ITEMS = [...GIFT_IDEAS, ...GIFT_IDEAS];
+
 export default function Marquee() {
   return (
-    <section aria-label="רעיונות למתנה" className="relative -my-8 overflow-hidden py-6 sm:-my-10 sm:py-10">
+    <section
+      aria-label="רעיונות למתנה"
+      className="relative -my-8 overflow-hidden py-6 sm:-my-10 sm:py-10 lg:-my-16"
+    >
       <div className="-mx-[10%] w-[120%] -rotate-[2.7deg]">
-        <div className="flex w-max animate-marquee items-center gap-8 bg-purple py-6 sm:py-10">
-          <MarqueeRow />
-          <MarqueeRow ariaHidden />
+        {/* Extra vertical padding at lg+ so the rotated band's own height comfortably
+            outgrows the corner recession caused by rotating such a wide, shallow strip
+            (recession grows with viewport width) — eliminates the gaps that otherwise
+            appear at the top-left/bottom-right corners on wide desktop screens. */}
+        <div className="flex w-max animate-marquee items-center bg-purple py-6 sm:py-10 lg:py-16">
+          {LOOP_ITEMS.map((idea, i) => (
+            <MarqueeItem key={i} idea={idea} ariaHidden={i >= GIFT_IDEAS.length} />
+          ))}
         </div>
       </div>
     </section>

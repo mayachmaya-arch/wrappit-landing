@@ -18,18 +18,18 @@ export default function Hero() {
     <section
       id="top"
       aria-label="פתיח"
-      className="relative flex min-h-[520px] flex-col items-start justify-end gap-10 pt-16 pb-16 sm:pt-24 sm:pb-20"
+      className="relative flex min-h-[520px] flex-col items-start justify-end gap-10 pt-16 pb-16 sm:pt-24 sm:pb-20 lg:min-h-[620px] xl:min-h-[700px]"
     >
       <div className="flex flex-col items-start text-cloud">
         <div
-          className="relative h-[1.1em] w-full font-display text-[15vw] leading-none font-bold text-right sm:text-[8vw] lg:h-[110px] lg:text-[80px] xl:h-[146px] xl:text-[104px]"
+          className="relative h-[1.1em] w-full font-display text-[15vw] leading-none font-bold text-right sm:text-[8vw] lg:h-[110px] lg:w-[820px] lg:text-[80px] xl:h-[146px] xl:w-[1050px] xl:text-[104px]"
           role="text"
         >
           {ROTATING_PHRASES.map((phrase, index) => (
             <span
               key={phrase}
               aria-hidden={index !== activeIndex}
-              className="absolute inset-0 flex items-center justify-start transition-opacity duration-700 ease-in-out"
+              className="absolute inset-0 flex items-center justify-start whitespace-nowrap transition-opacity duration-700 ease-in-out"
               style={{ opacity: index === activeIndex ? 1 : 0 }}
             >
               {phrase}

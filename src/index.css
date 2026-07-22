@@ -58,3 +58,9 @@ body {
 .animate-marquee {
   animation: marquee-scroll 34s linear infinite;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation-play-state: paused;
+  }
+}
