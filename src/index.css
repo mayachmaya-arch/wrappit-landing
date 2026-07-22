@@ -1,0 +1,60 @@
+@import 'tailwindcss';
+
+/*
+ * Reisinger Michal — free/open-source Hebrew display font (Dan Reisinger
+ * heritage project, with the National Library of Israel). Served locally,
+ * not from Google Fonts. Drop the extracted font file(s) into
+ * src/assets/fonts/ using these exact names — see README "פונטים" for the
+ * download link — and this block picks them up automatically. Until then,
+ * the browser falls back to Noto Sans Hebrew Black.
+ */
+@font-face {
+  font-family: 'Reisinger Michal';
+  src:
+    url('./assets/fonts/Reisinger-Michal.woff2') format('woff2'),
+    url('./assets/fonts/Reisinger-Michal.woff') format('woff'),
+    url('./assets/fonts/Reisinger-Michal.otf') format('opentype'),
+    url('./assets/fonts/Reisinger-Michal.ttf') format('truetype');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --color-cream: #f8f4f3;
+  --color-ink: #1f2834;
+  --color-cloud: #f9fafb;
+  --color-pink: #fe7e83;
+  --color-purple: #6750a4;
+
+  --font-hebrew: 'Noto Sans Hebrew', system-ui, sans-serif;
+  --font-logo: 'Berkshire Swash', cursive;
+  --font-display: 'Reisinger Michal', 'Noto Sans Hebrew', system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-hebrew);
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee-scroll 34s linear infinite;
+}

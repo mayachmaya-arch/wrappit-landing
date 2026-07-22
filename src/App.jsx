@@ -1,0 +1,33 @@
+import Header from './components/Header';
+import Hero from './components/Hero';
+import HeroBackground from './components/HeroBackground';
+import Marquee from './components/Marquee';
+import ProblemSection from './components/ProblemSection';
+import GiftCollage from './components/GiftCollage';
+import HowItWorks from './components/HowItWorks';
+import Pricing from './components/Pricing';
+import Footer from './components/Footer';
+
+function App() {
+  return (
+    <div dir="rtl" className="min-h-screen overflow-x-hidden bg-cream text-ink">
+      <div className="relative overflow-hidden bg-ink">
+        <HeroBackground />
+        <div className="absolute inset-0 bg-gradient-to-l from-ink/10 via-ink/40 to-ink/70" />
+        <div className="relative mx-auto flex max-w-[1820px] flex-col px-4 pt-4 sm:px-8 sm:pt-6">
+          <Header />
+          <Hero />
+        </div>
+      </div>
+
+      <Marquee />
+      <ProblemSection />
+      <GiftCollage />
+      <HowItWorks />
+      <Pricing />
+      <Footer />
+    </div>
+  );
+}
+
+export default App;
