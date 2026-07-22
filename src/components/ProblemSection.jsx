@@ -1,4 +1,5 @@
 import PhotoFrame from './PhotoFrame';
+import BridgeHeading from './BridgeHeading';
 
 // Plain /public paths (not ES imports) — dropping a real photo in with the
 // exact same filename replaces the placeholder automatically, no code change.
@@ -94,9 +95,8 @@ export default function ProblemSection() {
         </div>
       </div>
 
-      <div className="mx-auto mt-16 flex max-w-sm flex-col items-center gap-4 text-center">
-        <p className="font-logo text-4xl leading-none text-pink sm:text-5xl">Wrappit</p>
-        <p className="text-xl font-bold sm:text-2xl">פתרון פשוט כל כך</p>
+      <div className="mt-16">
+        <BridgeHeading tagline="פתרון פשוט כל כך" />
       </div>
     </section>
   );

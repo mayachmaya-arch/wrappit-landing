@@ -38,7 +38,7 @@ export default function Hero() {
           <span className="sr-only">{ROTATING_PHRASES[activeIndex]}</span>
         </div>
         <p className="mt-2 text-[8vw] font-light sm:text-[5vw] lg:text-[48px] xl:text-[60px]">
-          תנו מתנה ישר מהלב, ובצ׳יק
+          הפעם תביאו משהו בול.
         </p>
       </div>
 

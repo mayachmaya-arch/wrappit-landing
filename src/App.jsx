@@ -1,9 +1,12 @@
 import Header from './components/Header';
 import Hero from './components/Hero';
-import ProblemSection from './components/ProblemSection';
-import DarkGallery from './components/DarkGallery';
-import Marquee from './components/Marquee';
 import HeroBackground from './components/HeroBackground';
+import Marquee from './components/Marquee';
+import ProblemSection from './components/ProblemSection';
+import GiftCollage from './components/GiftCollage';
+import HowItWorks from './components/HowItWorks';
+import Pricing from './components/Pricing';
+import Footer from './components/Footer';
 
 function App() {
   return (
@@ -17,9 +20,12 @@ function App() {
         </div>
       </div>
 
-      <ProblemSection />
-      <DarkGallery />
       <Marquee />
+      <ProblemSection />
+      <GiftCollage />
+      <HowItWorks />
+      <Pricing />
+      <Footer />
     </div>
   );
 }
