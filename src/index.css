@@ -3,10 +3,10 @@
 /*
  * Reisinger Michal — free/open-source Hebrew display font (Dan Reisinger
  * heritage project, with the National Library of Israel). Served locally,
- * not from Google Fonts. Drop the extracted font file(s) into
- * src/assets/fonts/ using these exact names — see README "פונטים" for the
- * download link — and this block picks them up automatically. Until then,
- * the browser falls back to Noto Sans Hebrew Black.
+ * not from Google Fonts. Only the Bold weight is loaded, since it's the
+ * only weight used (the rotating hero headline, via font-bold). This is a
+ * static Bold-only file, not a variable font, so font-weight is pinned to
+ * 700 rather than declared as a range.
  */
 @font-face {
   font-family: 'Reisinger Michal';
@@ -15,7 +15,7 @@
     url('./assets/fonts/Reisinger-Michal.woff') format('woff'),
     url('./assets/fonts/Reisinger-Michal.otf') format('opentype'),
     url('./assets/fonts/Reisinger-Michal.ttf') format('truetype');
-  font-weight: 400 900;
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
