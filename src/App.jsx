@@ -22,15 +22,17 @@ function App() {
           background" on purpose; it's just what's already behind everything. */}
       <div className="hero-viewport relative flex flex-col overflow-x-hidden">
         {/* Video + dark gradient, clipped to stop short of the hero's bottom
-            edge (see bottom-20 below) instead of running the full inset-0
-            height. The purple marquee's band is thick enough to fully cover
-            that stopped-short strip on its own (verified empirically — see
-            commit message), so the strip never shows on its own; it only
-            ever shows through in the sliver where the marquee's rotation
-            recedes from the hero's flat bottom edge, and now that sliver is
-            genuinely empty rather than backed by dark content, so it reveals
-            the page's real cream background instead of a manufactured patch. */}
-        <div className="absolute inset-x-0 top-0 bottom-20 overflow-hidden bg-ink">
+            edge (see bottom-[4vw] below) instead of running the full inset-0
+            height. 4vw is proportional, not a fixed pixel patch: the purple
+            band is rotated -2.7deg at 120vw wide, so its far corners recede
+            from the hero's flat bottom edge by (0.6*100vw)*sin(2.7deg) ≈
+            2.83vw at any viewport width. Clipping the video short by 4vw
+            keeps a ~1.4x safety margin over that recession at every width,
+            while staying comfortably under the band's own thickness, so the
+            strip this reveals is always fully covered by the band except in
+            that receded sliver — where it now reveals the page's real cream
+            background instead of a manufactured patch. */}
+        <div className="absolute inset-x-0 top-0 bottom-[4vw] overflow-hidden bg-ink">
           <HeroBackground />
           <div className="absolute inset-0 bg-gradient-to-l from-ink/10 via-ink/40 to-ink/70" />
         </div>
