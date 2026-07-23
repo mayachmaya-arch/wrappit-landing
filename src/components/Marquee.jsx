@@ -43,22 +43,37 @@ const LOOP_ITEMS = [...GIFT_IDEAS, ...GIFT_IDEAS];
 
 export default function Marquee() {
   return (
-    // The purple background lives here, on this stationary band — never on the
-    // moving track. Previously bg-purple was on the animated element itself:
-    // since that element's own width is finite (even duplicated), translating
-    // it eventually slides its trailing edge past the viewport, exposing
-    // whatever sits behind (no purple) before the loop resets — a real gap
-    // during playback, not just at rest. A band that never moves, sized once
-    // to 120vw, is always fully purple; only the content inside it slides.
-    <div
-      aria-label="רעיונות למתנה"
-      className="absolute bottom-0 left-[-10vw] w-[120vw] -rotate-[2.7deg] overflow-hidden bg-purple py-6 sm:py-10 lg:py-16"
-    >
-      <div className="flex w-max animate-marquee items-center">
-        {LOOP_ITEMS.map((idea, i) => (
-          <MarqueeItem key={i} idea={idea} ariaHidden={i >= GIFT_IDEAS.length} />
-        ))}
+    <>
+      {/* Stationary light-background layer, sitting behind the purple band and
+          in front of the hero video. The band's rotation leaves a thin
+          triangular gap between its own lower edge and the hero's actual
+          bottom edge (a wide, shallow rotated strip has real corner
+          recession, and it isn't uniform across viewport widths — up to
+          ~20px at 1440/1366 even after sizing the band generously). Without
+          this layer, that sliver shows raw hero video; with it, that sliver
+          shows the next section's own background color instead, so the
+          transition reads as "video → purple → light", never "video → gap →
+          purple". Sized comfortably short of the band's own thickness so it
+          never peeks out above the band's top edge. */}
+      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-20 bg-cream" />
+      {/* The purple background lives here, on this stationary band — never on
+          the moving track. Previously bg-purple was on the animated element
+          itself: since that element's own width is finite (even duplicated),
+          translating it eventually slides its trailing edge past the
+          viewport, exposing whatever sits behind (no purple) before the loop
+          resets — a real gap during playback, not just at rest. A band that
+          never moves, sized once to 120vw, is always fully purple; only the
+          content inside it slides. */}
+      <div
+        aria-label="רעיונות למתנה"
+        className="absolute bottom-0 left-[-10vw] w-[120vw] -rotate-[2.7deg] overflow-hidden bg-purple py-6 sm:py-10 lg:py-16"
+      >
+        <div className="flex w-max animate-marquee items-center">
+          {LOOP_ITEMS.map((idea, i) => (
+            <MarqueeItem key={i} idea={idea} ariaHidden={i >= GIFT_IDEAS.length} />
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
