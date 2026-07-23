@@ -12,6 +12,10 @@ function GiftRibbonIcon({ className = '' }) {
   );
 }
 
+// Same production app route as Header.jsx/Hero.jsx (gift-wish-unfold): every
+// plan's CTA starts the same seller onboarding flow, regardless of plan.
+const OPEN_STORE_URL = 'https://gift-wish-unfold.vercel.app/business/onboarding?source=landing';
+
 function CheckIcon() {
   return (
     <svg viewBox="0 0 20 20" className="size-5 shrink-0 text-emerald-600" fill="none" aria-hidden="true">
@@ -94,14 +98,14 @@ function PricingCard({ plan }) {
         ))}
       </ul>
 
-      <button
-        type="button"
-        className={`mt-8 rounded-full py-3 text-base font-semibold transition-opacity hover:opacity-90 ${
+      <a
+        href={OPEN_STORE_URL}
+        className={`mt-8 rounded-full py-3 text-center text-base font-semibold transition-opacity hover:opacity-90 ${
           plan.highlighted ? 'bg-pink text-white' : 'border border-ink text-ink'
         }`}
       >
         {plan.cta}
-      </button>
+      </a>
     </div>
   );
 }

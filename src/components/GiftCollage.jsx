@@ -1,30 +1,26 @@
 import PhotoFrame from './PhotoFrame';
 import BridgeHeading from './BridgeHeading';
 
-// Small sample of rotated "gift idea" cards as a decorative backdrop —
-// a simplified stand-in for the ~35-card collage in the final Figma file.
-// See README.md → "העלאת נכסים בעצמך".
-const COLLAGE_CARDS = [
-  { price: 120, title: 'רחצה לכלבים קטנים', subtitle: 'שמפו עדין וניחוח נעים', src: '/images/gallery-photo-1.jpg' },
-  { price: 250, title: 'טיפול ספא מפנק', subtitle: 'עיסוי מרגיע ושמנים', src: '/images/gallery-photo-2.jpg' },
-  { price: 190, title: 'עיצוב חגיגי', subtitle: 'תספורת ועיטורים', src: '/images/gallery-photo-3.jpg' },
-  { price: 320, title: 'חבילת טיפוח VIP', subtitle: 'כל השירותים במחיר אחד', src: '/images/gallery-photo-1.jpg' },
-  { price: 95, title: 'גזיזת ציפורניים', subtitle: 'זהירות מלאה ובטיחות', src: '/images/gallery-photo-2.jpg' },
-  { price: 210, title: 'טיפול פרוות משי', subtitle: 'מרכך פרימיום וברק', src: '/images/gallery-photo-3.jpg' },
-];
+// Plain square photo tiles forming a diagonal band behind the phone — a
+// simplified stand-in for the dense multi-row photo mosaic in the Figma
+// file. No price/title chrome: the Figma reference for this section is
+// pure photography, not a browsable product-card list (that pattern lives
+// on the app's own discover screen, not the landing page). See README.md
+// → "העלאת נכסים בעצמך".
+const GALLERY_PHOTOS = ['/images/gallery-photo-1.jpg', '/images/gallery-photo-2.jpg', '/images/gallery-photo-3.jpg'];
 
-function CollageCard({ price, title, subtitle, src }) {
+const MOSAIC_ROW_TOP = Array.from({ length: 9 }, (_, i) => GALLERY_PHOTOS[i % GALLERY_PHOTOS.length]);
+const MOSAIC_ROW_BOTTOM = Array.from({ length: 9 }, (_, i) => GALLERY_PHOTOS[(i + 2) % GALLERY_PHOTOS.length]);
+
+function MosaicTile({ src }) {
   return (
-    <div className="flex w-[220px] shrink-0 flex-col overflow-hidden rounded-2xl bg-cloud shadow-lg">
-      <div className="flex items-center justify-between p-3 text-right" dir="rtl">
-        <span className="text-lg font-bold text-ink">₪{price}</span>
-        <div className="flex flex-col items-end gap-0.5">
-          <p className="text-sm font-bold text-ink">{title}</p>
-          <p className="text-xs text-stone-500">{subtitle}</p>
-        </div>
-      </div>
-      <PhotoFrame src={src} alt={title} className="aspect-[4/3] w-full" gradient="from-amber-100 via-rose-100 to-stone-200" rounded="rounded-none" />
-    </div>
+    <PhotoFrame
+      src={src}
+      alt=""
+      rounded="rounded-xl"
+      gradient="from-amber-100 via-rose-100 to-stone-200"
+      className="aspect-square w-[100px] shrink-0 shadow-md sm:w-[130px] lg:w-[150px]"
+    />
   );
 }
 
@@ -56,7 +52,7 @@ function PhoneMockup() {
       </div>
 
       <button type="button" className="mx-5 my-5 rounded-full bg-pink py-3 text-base font-semibold text-white">
-        שלחו לי מתנה
+        מצאו לי מתנה
       </button>
     </div>
   );
@@ -67,12 +63,19 @@ export default function GiftCollage() {
     <section id="solution" aria-label="הפתרון שלנו" className="relative overflow-hidden py-20 sm:py-28">
       <div className="relative flex items-center justify-center">
         <div
-          className="pointer-events-none absolute inset-x-[-10%] top-1/2 flex -translate-y-1/2 -rotate-6 justify-center gap-6 opacity-70"
+          className="pointer-events-none absolute inset-x-[-10%] top-1/2 flex -translate-y-1/2 flex-col gap-3 -rotate-6 opacity-80 sm:gap-4"
           aria-hidden="true"
         >
-          {[...COLLAGE_CARDS, ...COLLAGE_CARDS].map((card, i) => (
-            <CollageCard key={i} {...card} />
-          ))}
+          <div className="flex justify-center gap-3 sm:gap-4">
+            {[...MOSAIC_ROW_TOP, ...MOSAIC_ROW_TOP].map((src, i) => (
+              <MosaicTile key={i} src={src} />
+            ))}
+          </div>
+          <div className="flex justify-center gap-3 sm:gap-4">
+            {[...MOSAIC_ROW_BOTTOM, ...MOSAIC_ROW_BOTTOM].map((src, i) => (
+              <MosaicTile key={i} src={src} />
+            ))}
+          </div>
         </div>
         <div className="relative z-10">
           <PhoneMockup />
