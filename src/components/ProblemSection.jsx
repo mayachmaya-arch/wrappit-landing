@@ -28,23 +28,23 @@ const BUSINESS_NOTES = [
 const BUSINESS_PHOTOS = [
   {
     src: '/images/business-photo-1.jpg',
-    alt: 'בעל עסק קטן מאחורי הדלפק',
+    alt: 'עגלת קפה רחוב עם בעל עסק מגיש לקוחות',
     className: 'translate-y-6 rotate-[-8deg]',
   },
   {
     src: '/images/business-photo-2.jpg',
     alt: 'שוק ירקות אורגניים',
-    className: '-ms-8 -translate-y-2 rotate-[-3deg] sm:-ms-10',
+    className: '-ms-10 -translate-y-3 rotate-[-3deg] sm:-ms-12',
   },
   {
     src: '/images/business-photo-3.jpg',
-    alt: 'בעלת עסק אופנה מסדרת מוצרים',
-    className: '-ms-8 translate-y-5 rotate-[4deg] sm:-ms-10',
+    alt: 'מדריך רוכב אופניים בטבע, בעל עסק סיורי אופניים',
+    className: '-ms-10 translate-y-6 rotate-[4deg] sm:-ms-12',
   },
   {
     src: '/images/business-photo-4.jpg',
-    alt: 'סטודיו קרמיקה של בעלת עסק',
-    className: '-ms-8 -translate-y-1 rotate-[9deg] sm:-ms-10',
+    alt: 'סטודיו יוגה מסודר עם מזרנים וציוד',
+    className: '-ms-10 -translate-y-1 rotate-[9deg] sm:-ms-12',
   },
 ];
 
@@ -68,7 +68,7 @@ export default function ProblemSection() {
             <p className="text-xl font-bold">מצד אחד</p>
             <h2 className="text-3xl sm:text-4xl">קוני מתנה</h2>
           </hgroup>
-          <div className="relative w-full max-w-md px-6 py-10">
+          <div className="relative w-full max-w-lg px-6 py-10">
             <PhotoFrame
               src={buyerPhoto}
               alt="קונה מתנות מביטה בטלפון בתסכול, מוקפת באפשרויות מתנה אינסופיות"
@@ -86,7 +86,7 @@ export default function ProblemSection() {
             <p className="text-xl font-bold">מצד שני</p>
             <h2 className="text-3xl sm:text-4xl">בעלי עסקים</h2>
           </hgroup>
-          <div className="relative w-full max-w-md px-6 py-14">
+          <div className="relative w-full max-w-lg px-6 py-14">
             <div className="flex items-center justify-center">
               {BUSINESS_PHOTOS.map((photo, i) => (
                 <PhotoFrame
@@ -94,7 +94,7 @@ export default function ProblemSection() {
                   src={photo.src}
                   alt={photo.alt}
                   gradient="from-amber-100 via-stone-100 to-stone-200"
-                  className={`aspect-[3/4] w-[30%] shrink-0 shadow-[10px_10px_20px_rgba(0,0,0,0.12)] ${photo.className}`}
+                  className={`aspect-[3/4] w-[34%] shrink-0 shadow-[10px_10px_20px_rgba(0,0,0,0.12)] ${photo.className}`}
                   style={{ zIndex: (i + 1) * 10 }}
                 />
               ))}
