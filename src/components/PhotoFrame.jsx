@@ -7,10 +7,11 @@ export default function PhotoFrame({
   className = '',
   gradient = 'from-stone-300 via-stone-200 to-stone-300',
   rounded = 'rounded-2xl',
+  style,
   children,
 }) {
   return (
-    <div className={`relative overflow-hidden bg-gradient-to-br ${gradient} ${rounded} ${className}`}>
+    <div className={`relative overflow-hidden bg-gradient-to-br ${gradient} ${rounded} ${className}`} style={style}>
       {src && (
         <img
           src={src}

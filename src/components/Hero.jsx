@@ -4,6 +4,12 @@ const ROTATING_PHRASES = ['יום הולדת?', 'בר מצווה?', 'חתונת 
 
 const PHRASE_INTERVAL_MS = 1200;
 
+// Same production app routes as Header.jsx (gift-wish-unfold): /discover is
+// the swipe-based gift discovery screen, /business/onboarding is the seller
+// onboarding flow.
+const BUY_GIFT_URL = 'https://gift-wish-unfold.vercel.app/discover?source=landing';
+const OPEN_STORE_URL = 'https://gift-wish-unfold.vercel.app/business/onboarding?source=landing';
+
 export default function Hero() {
   const [activeIndex, setActiveIndex] = useState(0);
   const intervalRef = useRef(null);
@@ -78,13 +84,13 @@ export default function Hero() {
 
         <div className="flex flex-wrap items-start gap-4">
           <a
-            href="#founding-business"
+            href={OPEN_STORE_URL}
             className="flex h-[60px] items-center justify-center rounded-full bg-pink px-6 py-3 text-lg font-semibold whitespace-nowrap text-white transition-opacity hover:opacity-90"
           >
             הצטרפו כעסק מייסד
           </a>
           <a
-            href="#discover"
+            href={BUY_GIFT_URL}
             className="flex items-center justify-center rounded-full px-6 py-3 text-lg font-semibold whitespace-nowrap text-cloud transition-opacity hover:opacity-80"
           >
             גלו את המתנה המושלמת
