@@ -68,9 +68,28 @@ export default function Marquee() {
     // hero's bottom edge, so wherever this band's rotation recedes from that
     // edge, the page's real cream background already shows through on its
     // own; nothing needs to be painted over it.
+    //
+    // position: relative (not absolute) is the fix for a real overlap bug:
+    // absolute+bottom-0 pinned this to hero-viewport's bottom edge no matter
+    // how tall the content above it was, so at narrow widths — where the
+    // hero copy wraps onto more lines — the last line/button could render
+    // underneath this band instead of above it, with nothing reserving
+    // space for it. As a normal (if repositioned) flex child of
+    // hero-viewport, its height is counted in that column's layout, so
+    // Hero's own flex-1+justify-end content always lands flush above it,
+    // at any viewport size, with no hardcoded per-breakpoint clearance.
+    //
+    // self-center (not a left offset) centers the 120vw band within the
+    // narrower flex column, splitting the 20vw of extra width evenly as a
+    // 10vw bleed on each side — deliberately direction-agnostic. A `left`
+    // offset here would be relative to this item's own flex cross-axis
+    // start position, which under RTL is the *right* edge, not x:0 as a
+    // fixed-pixel offset would assume; that mismatch left the band's right
+    // edge short of the viewport's right edge by ~10vw (a real gap,
+    // reproduced and measured before this fix).
     <div
       aria-label="רעיונות למתנה"
-      className="absolute bottom-0 left-[-10vw] w-[120vw] -rotate-[2.7deg] overflow-hidden bg-purple py-6 sm:py-10 lg:py-16"
+      className="w-[120vw] shrink-0 self-center -rotate-[2.7deg] overflow-hidden bg-purple py-6 sm:py-10 lg:py-16"
     >
       <div className="flex w-max animate-marquee items-center">
         {LOOP_ITEMS.map((idea, i) => (

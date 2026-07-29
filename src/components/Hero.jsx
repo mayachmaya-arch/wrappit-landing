@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 const ROTATING_PHRASES = ['יום הולדת?', 'בר מצווה?', 'חתונת הזהב?', 'יום האהבה?', 'רוצה להגיד תודה?'];
 
-const PHRASE_INTERVAL_MS = 1200;
+const PHRASE_INTERVAL_MS = 700;
 
 // Same production app routes as Header.jsx (gift-wish-unfold): /discover is
 // the swipe-based gift discovery screen, /business/onboarding is the seller
@@ -52,7 +52,7 @@ export default function Hero() {
     <section
       id="top"
       aria-label="פתיח"
-      className="relative flex flex-1 flex-col items-start justify-end gap-10 pt-16 pb-16 sm:pt-24 sm:pb-20 lg:gap-[14px] lg:pt-0 lg:pb-[255px]"
+      className="relative flex flex-1 flex-col items-start justify-end gap-5 pt-4 pb-6 sm:gap-7 sm:pt-6 sm:pb-8 lg:gap-[14px] lg:pt-0 lg:pb-0"
     >
       <div className="flex flex-col items-start text-cloud">
         <div
@@ -76,13 +76,13 @@ export default function Hero() {
         </p>
       </div>
 
-      <div className="flex w-full flex-col items-start gap-8 lg:gap-[24px]">
+      <div className="flex w-full flex-col items-start gap-4 sm:gap-6 lg:gap-[24px]">
         <p className="max-w-[1086px] text-right text-xl leading-normal text-cloud sm:text-2xl lg:text-[28px]">
           מרקטפלייס מתנות חכם שמקשר בין <span className="font-black">עסקים ישראלים</span> ל
           <span className="font-black">מחפשי מתנות עסוקים</span>
         </p>
 
-        <div className="flex flex-wrap items-start gap-4">
+        <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:gap-4">
           <a
             href={OPEN_STORE_URL}
             className="flex h-[60px] items-center justify-center rounded-full bg-pink px-6 py-3 text-lg font-semibold whitespace-nowrap text-white transition-opacity hover:opacity-90"
