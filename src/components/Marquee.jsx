@@ -54,47 +54,51 @@ const LOOP_ITEMS = [...GIFT_IDEAS, ...GIFT_IDEAS];
 
 export default function Marquee() {
   return (
-    // The purple background lives here, on this stationary band — never on
-    // the moving track. Previously bg-purple was on the animated element
-    // itself: since that element's own width is finite (even duplicated),
-    // translating it eventually slides its trailing edge past the viewport,
-    // exposing whatever sits behind (no purple) before the loop resets — a
-    // real gap during playback, not just at rest. A band that never moves,
-    // sized once to 120vw, is always fully purple; only the content inside
-    // it slides.
+    // Outer clip wrapper — this, not the band itself, is the flex child
+    // hero-viewport reserves space for. It exists to crop the band's
+    // rotation asymmetrically: the band is rotated -2.7deg around its own
+    // center, and for a box this wide (~120% of viewport) that swings its
+    // far corners vertically by about (width/2)*sin(2.7deg) ≈ 2.83vw —
+    // upward on one side, downward on the other, in *addition* to the
+    // band's own unrotated height. Reproduced and measured: at 1440px
+    // that upward swing put the band's top edge ~41px above this
+    // wrapper's natural top, overlapping the hero CTA button beneath it.
     //
-    // There is no separate light-background filler here anymore — the hero's
-    // video/gradient layer (App.jsx) is itself clipped to stop short of the
-    // hero's bottom edge, so wherever this band's rotation recedes from that
-    // edge, the page's real cream background already shows through on its
-    // own; nothing needs to be painted over it.
-    //
-    // position: relative (not absolute) is the fix for a real overlap bug:
-    // absolute+bottom-0 pinned this to hero-viewport's bottom edge no matter
-    // how tall the content above it was, so at narrow widths — where the
-    // hero copy wraps onto more lines — the last line/button could render
-    // underneath this band instead of above it, with nothing reserving
-    // space for it. As a normal (if repositioned) flex child of
-    // hero-viewport, its height is counted in that column's layout, so
-    // Hero's own flex-1+justify-end content always lands flush above it,
-    // at any viewport size, with no hardcoded per-breakpoint clearance.
-    //
-    // self-center (not a left offset) centers the 120vw band within the
-    // narrower flex column, splitting the 20vw of extra width evenly as a
-    // 10vw bleed on each side — deliberately direction-agnostic. A `left`
-    // offset here would be relative to this item's own flex cross-axis
-    // start position, which under RTL is the *right* edge, not x:0 as a
-    // fixed-pixel offset would assume; that mismatch left the band's right
-    // edge short of the viewport's right edge by ~10vw (a real gap,
-    // reproduced and measured before this fix).
-    <div
-      aria-label="רעיונות למתנה"
-      className="w-[120vw] shrink-0 self-center -rotate-[2.7deg] overflow-hidden bg-purple py-6 sm:py-10 lg:py-16"
-    >
-      <div className="flex w-max animate-marquee items-center">
-        {LOOP_ITEMS.map((idea, i) => (
-          <MarqueeItem key={i} idea={idea} ariaHidden={i >= GIFT_IDEAS.length} />
-        ))}
+    // The downward half of that same swing is wanted (it's what makes the
+    // purple band fully mask the hero's bottom edge — see App.jsx's video
+    // clip comment), so the fix can't just clip both edges evenly. Instead
+    // this wrapper's padding-bottom extends its own clip box (its
+    // padding-box, which is what overflow:hidden clips to) further down
+    // than its layout footprint, while an equal negative margin-bottom
+    // cancels that extra padding back out of hero-viewport's flex-height
+    // reservation — so Hero's content still lands exactly where it did
+    // before (this doesn't push it up), while the band's top edge is now
+    // clipped flush at the wrapper's natural top, and its bottom-side
+    // bleed still renders freely within the extended padding-box.
+    <div className="relative -mb-[4vw] w-[calc(100%+20vw)] shrink-0 self-center overflow-hidden pb-[4vw]">
+      {/* The purple background lives here, on this stationary band — never
+          on the moving track. Previously bg-purple was on the animated
+          element itself: since that element's own width is finite (even
+          duplicated), translating it eventually slides its trailing edge
+          past the viewport, exposing whatever sits behind (no purple)
+          before the loop resets — a real gap during playback, not just at
+          rest. A band that never moves is always fully purple; only the
+          content inside it slides.
+
+          There is no separate light-background filler here — the hero's
+          video/gradient layer (App.jsx) is itself clipped to stop short of
+          the hero's bottom edge, so wherever this band's rotation recedes
+          from that edge, the page's real cream background already shows
+          through on its own; nothing needs to be painted over it. */}
+      <div
+        aria-label="רעיונות למתנה"
+        className="w-full -rotate-[2.7deg] overflow-hidden bg-purple py-6 sm:py-10 lg:py-16"
+      >
+        <div className="flex w-max animate-marquee items-center">
+          {LOOP_ITEMS.map((idea, i) => (
+            <MarqueeItem key={i} idea={idea} ariaHidden={i >= GIFT_IDEAS.length} />
+          ))}
+        </div>
       </div>
     </div>
   );
