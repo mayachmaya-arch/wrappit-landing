@@ -1,57 +1,151 @@
+import { useEffect, useState } from 'react';
 import PhotoFrame from './PhotoFrame';
 import BridgeHeading from './BridgeHeading';
 
-// Plain square photo tiles forming a diagonal band behind the phone — a
-// simplified stand-in for the dense multi-row photo mosaic in the Figma
-// file. No price/title chrome: the Figma reference for this section is
-// pure photography, not a browsable product-card list (that pattern lives
-// on the app's own discover screen, not the landing page). See README.md
-// → "העלאת נכסים בעצמך".
-const GALLERY_PHOTOS = ['/images/gallery-photo-1.jpg', '/images/gallery-photo-2.jpg', '/images/gallery-photo-3.jpg'];
+// Real photos only (no gradient placeholders) — the same five photos
+// already vetted and placed for ProblemSection, reused here in different
+// orders/rotations to build two collage arrangements that crossfade. See
+// README.md → "העלאת נכסים בעצמך" if gallery-photo-*.jpg ever get real
+// images of their own; those still are placeholders today and are
+// deliberately left out of this section.
+const REAL_PHOTOS = [
+  '/images/buyer-photo.jpg',
+  '/images/business-photo-1.jpg',
+  '/images/business-photo-2.jpg',
+  '/images/business-photo-3.jpg',
+  '/images/business-photo-4.jpg',
+];
 
-const MOSAIC_ROW_TOP = Array.from({ length: 9 }, (_, i) => GALLERY_PHOTOS[i % GALLERY_PHOTOS.length]);
-const MOSAIC_ROW_BOTTOM = Array.from({ length: 9 }, (_, i) => GALLERY_PHOTOS[(i + 2) % GALLERY_PHOTOS.length]);
+const COLLAGE_SETS = [
+  [REAL_PHOTOS[1], REAL_PHOTOS[2], REAL_PHOTOS[0], REAL_PHOTOS[3], REAL_PHOTOS[4], REAL_PHOTOS[2]],
+  [REAL_PHOTOS[3], REAL_PHOTOS[0], REAL_PHOTOS[4], REAL_PHOTOS[1], REAL_PHOTOS[2], REAL_PHOTOS[0]],
+];
 
-function MosaicTile({ src }) {
+const COLLAGE_CROSSFADE_MS = 7000;
+
+const SEARCH_PHRASES = [
+  'מתנה ליום הולדת לאמא',
+  'משהו מקורי לחבר הכי טוב',
+  'מתנת פרישה לקולגה יקרה',
+  'מתנה רומנטית ליום נישואין',
+];
+
+const TYPE_MS = 55;
+const DELETE_MS = 30;
+const HOLD_MS = 1400;
+
+function CollageTile({ src, className = '' }) {
   return (
     <PhotoFrame
       src={src}
       alt=""
-      rounded="rounded-xl"
+      rounded="rounded-2xl"
       gradient="from-amber-100 via-rose-100 to-stone-200"
-      className="aspect-square w-[100px] shrink-0 shadow-md sm:w-[130px] lg:w-[150px]"
+      className={`aspect-square w-[150px] shrink-0 shadow-lg sm:w-[190px] lg:w-[220px] ${className}`}
     />
   );
 }
 
-function PhoneMockup() {
+function CollageLayer({ photos, active }) {
   return (
-    <div className="mx-auto flex w-[260px] shrink-0 flex-col overflow-hidden rounded-[36px] border-4 border-stone-800 bg-white shadow-2xl sm:w-[280px]">
+    <div
+      className={`absolute inset-0 flex items-center justify-center gap-4 transition-opacity duration-[1800ms] ease-in-out sm:gap-5 ${
+        active ? 'opacity-100' : 'opacity-0'
+      }`}
+      aria-hidden="true"
+    >
+      {photos.map((src, i) => (
+        <CollageTile key={i} src={src} className={i % 2 === 1 ? 'translate-y-6 sm:translate-y-8' : '-translate-y-2'} />
+      ))}
+    </div>
+  );
+}
+
+// Typewriter: types a phrase, holds it, deletes it, moves to the next —
+// paused entirely under prefers-reduced-motion (lands on the first phrase,
+// fully typed, with no blinking caret).
+function useTypewriter(phrases) {
+  const [text, setText] = useState('');
+  const [reducedMotion] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  );
+
+  useEffect(() => {
+    if (reducedMotion) {
+      setText(phrases[0]);
+      return undefined;
+    }
+
+    let phraseIndex = 0;
+    let charIndex = 0;
+    let phase = 'typing';
+    let timeoutId;
+
+    function tick() {
+      const phrase = phrases[phraseIndex];
+
+      if (phase === 'typing') {
+        charIndex += 1;
+        setText(phrase.slice(0, charIndex));
+        if (charIndex >= phrase.length) {
+          phase = 'holding';
+          timeoutId = setTimeout(tick, HOLD_MS);
+          return;
+        }
+        timeoutId = setTimeout(tick, TYPE_MS);
+        return;
+      }
+
+      if (phase === 'holding') {
+        phase = 'deleting';
+        timeoutId = setTimeout(tick, DELETE_MS);
+        return;
+      }
+
+      // deleting
+      charIndex -= 1;
+      setText(phrase.slice(0, charIndex));
+      if (charIndex <= 0) {
+        phraseIndex = (phraseIndex + 1) % phrases.length;
+        phase = 'typing';
+        timeoutId = setTimeout(tick, TYPE_MS);
+        return;
+      }
+      timeoutId = setTimeout(tick, DELETE_MS);
+    }
+
+    timeoutId = setTimeout(tick, TYPE_MS);
+    return () => clearTimeout(timeoutId);
+  }, [phrases, reducedMotion]);
+
+  return { text, showCaret: !reducedMotion };
+}
+
+function PhoneMockup() {
+  const { text, showCaret } = useTypewriter(SEARCH_PHRASES);
+
+  return (
+    <div className="mx-auto flex w-[300px] shrink-0 flex-col overflow-hidden rounded-[40px] border-[6px] border-stone-800 bg-white shadow-2xl sm:w-[340px] lg:w-[380px] lg:rounded-[48px] lg:border-8">
       <div className="mx-auto mt-3 h-1.5 w-16 rounded-full bg-stone-300" />
-      <div className="flex items-center justify-between px-5 pt-4 text-xs text-stone-500">
+      <div className="flex items-center justify-between px-6 pt-4 text-xs text-stone-500 sm:text-sm">
         <span>13:54</span>
-        <span className="font-logo text-lg text-pink">Wrappit</span>
+        <span className="font-logo text-lg text-pink sm:text-xl">Wrappit</span>
       </div>
 
-      <div className="mx-4 mt-6 aspect-square rounded-2xl bg-gradient-to-br from-amber-200 via-rose-100 to-stone-200" />
-
-      <div className="flex flex-col gap-1 px-5 pt-5">
-        <p className="text-sm text-stone-500">שיעור גיטרה — עודן אצטרובל</p>
-        <p className="text-2xl font-black text-ink">₪1,600</p>
-      </div>
-
-      <div className="mx-5 mt-4 flex flex-col gap-3 rounded-2xl border border-stone-200 p-4">
-        <p className="text-sm font-bold text-ink">ספרו לנו על מקבל/ת המתנה</p>
-        <div className="flex gap-2 text-xs">
-          <span className="rounded-full bg-pink px-3 py-1 font-semibold text-white">מכיר/ה אישית</span>
-          <span className="rounded-full border border-stone-300 px-3 py-1 text-stone-500">לא מכיר/ה</span>
-        </div>
-        <div className="h-2 rounded-full bg-stone-200">
-          <div className="h-2 w-2/3 rounded-full bg-pink" />
+      <div className="flex flex-col gap-2 px-6 pt-6">
+        <p className="text-base font-bold text-ink sm:text-lg">מה תרצו למצוא?</p>
+        <div className="flex min-h-[56px] items-center rounded-xl bg-stone-50 px-4 py-3 text-sm text-ink sm:text-base" dir="rtl">
+          <span>{text}</span>
+          {showCaret && (
+            <span className="animate-caret me-0.5 inline-block h-4 w-[2px] bg-ink" aria-hidden="true" />
+          )}
         </div>
       </div>
 
-      <button type="button" className="mx-5 my-5 rounded-full bg-pink py-3 text-base font-semibold text-white">
+      <button
+        type="button"
+        className="mx-6 my-6 rounded-full bg-pink py-3 text-base font-semibold text-white sm:py-4 sm:text-lg"
+      >
         מצאו לי מתנה
       </button>
     </div>
@@ -59,30 +153,33 @@ function PhoneMockup() {
 }
 
 export default function GiftCollage() {
+  const [activeSet, setActiveSet] = useState(0);
+  const [reducedMotion] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  );
+
+  useEffect(() => {
+    if (reducedMotion) return undefined;
+    const id = setInterval(() => {
+      setActiveSet((prev) => (prev + 1) % COLLAGE_SETS.length);
+    }, COLLAGE_CROSSFADE_MS);
+    return () => clearInterval(id);
+  }, [reducedMotion]);
+
   return (
-    <section id="solution" aria-label="הפתרון שלנו" className="relative overflow-hidden py-20 sm:py-28">
-      <div className="relative flex items-center justify-center">
-        <div
-          className="pointer-events-none absolute inset-x-[-10%] top-1/2 flex -translate-y-1/2 flex-col gap-3 -rotate-6 opacity-80 sm:gap-4"
-          aria-hidden="true"
-        >
-          <div className="flex justify-center gap-3 sm:gap-4">
-            {[...MOSAIC_ROW_TOP, ...MOSAIC_ROW_TOP].map((src, i) => (
-              <MosaicTile key={i} src={src} />
-            ))}
-          </div>
-          <div className="flex justify-center gap-3 sm:gap-4">
-            {[...MOSAIC_ROW_BOTTOM, ...MOSAIC_ROW_BOTTOM].map((src, i) => (
-              <MosaicTile key={i} src={src} />
-            ))}
-          </div>
+    <section id="solution" aria-label="הפתרון שלנו" className="relative overflow-hidden pt-4 pb-20 sm:pt-6 sm:pb-28">
+      <div className="relative flex min-h-[520px] items-center justify-center py-10 sm:min-h-[600px]">
+        <div className="pointer-events-none absolute inset-x-[-10%] top-1/2 h-[260px] -translate-y-1/2 -rotate-6 opacity-90 sm:h-[300px]">
+          {COLLAGE_SETS.map((photos, i) => (
+            <CollageLayer key={i} photos={photos} active={reducedMotion ? i === 0 : i === activeSet} />
+          ))}
         </div>
         <div className="relative z-10">
           <PhoneMockup />
         </div>
       </div>
 
-      <div className="relative z-10 mt-20">
+      <div className="relative z-10 mt-16">
         <BridgeHeading tagline="ככה זה עובד" />
       </div>
     </section>

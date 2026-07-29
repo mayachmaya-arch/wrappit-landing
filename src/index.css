@@ -46,23 +46,37 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Full initial-viewport hero at desktop widths. svh (with a vh fallback for
-   browsers that don't support it) avoids the address-bar resize jump that
-   plain vh causes on mobile, which is exactly why this is scoped to desktop
-   only — mobile keeps its existing content-driven height. */
-@media (min-width: 1024px) {
-  .hero-viewport {
-    min-height: 100vh;
-    min-height: 100svh;
-  }
+/* Full initial-viewport hero (including the marquee band) at every width —
+   only the hero and its purple band should be visible before the user
+   scrolls. svh (with a vh fallback for browsers that don't support it)
+   avoids the address-bar resize jump that plain vh causes on mobile. The
+   hero's own content sits in a flex-1 child with justify-end (Hero.jsx),
+   so it's the flexible middle piece between the fixed-height header and
+   marquee — it absorbs whatever slack this min-height creates rather than
+   leaving dead space, at any viewport height. */
+.hero-viewport {
+  min-height: 100vh;
+  min-height: 100svh;
 }
 
+/* +50%, not -50%: under RTL, the track (wider than its band) rests flush
+   against the band's *right* edge by default block layout, with item 1
+   nearest that right edge and each later item further left — so the
+   doubled copy sits entirely to the *left* of copy 1 in the track's own
+   coordinate space. Translating negative slides the whole track further
+   left, past the band's viewing window, before the loop distance is even
+   reached — the window ends up looking at empty track past its own left
+   edge (reproduced: an entirely blank band around 70-85% through the
+   cycle). Translating positive instead sweeps the window's effective view
+   from copy 1 toward copy 2 correctly, and — since item 1 sits at the
+   high-coordinate end of that sweep — items still visually enter from the
+   right and exit left, matching expected RTL reading direction. */
 @keyframes marquee-scroll {
   from {
     transform: translateX(0);
   }
   to {
-    transform: translateX(-50%);
+    transform: translateX(50%);
   }
 }
 
@@ -73,5 +87,49 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .animate-marquee {
     animation-play-state: paused;
+  }
+}
+
+/* Typewriter caret for the GiftCollage phone mockup's animated search field. */
+@keyframes caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.animate-caret {
+  animation: caret-blink 1s step-end infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-caret {
+    animation: none;
+  }
+}
+
+/* Slow crossfade for GiftCollage's collage backdrop and the "gift arrives"
+   step's photo swap — both cross-fade two stacked, absolutely-positioned
+   images by animating opacity only, so there's no layout shift. */
+@keyframes crossfade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-crossfade {
+  animation: crossfade-in 1.8s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-crossfade {
+    animation: none;
   }
 }

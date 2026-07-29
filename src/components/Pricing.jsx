@@ -1,17 +1,3 @@
-function GiftRibbonIcon({ className = '' }) {
-  return (
-    <svg viewBox="0 0 48 60" className={className} fill="none" aria-hidden="true">
-      <path
-        d="M24 60V22M24 22c-8-6-16-4-16-14 0-5 4-8 8-8s8 6 8 14M24 22c8-6 16-4 16-14 0-5-4-8-8-8s-8 6-8 14"
-        stroke="currentColor"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 // Same production app route as Header.jsx/Hero.jsx (gift-wish-unfold): every
 // plan's CTA starts the same seller onboarding flow, regardless of plan.
 const OPEN_STORE_URL = 'https://gift-wish-unfold.vercel.app/business/onboarding?source=landing';
@@ -73,10 +59,18 @@ const PLANS = [
 function PricingCard({ plan }) {
   return (
     <div
-      className={`flex flex-1 flex-col rounded-3xl border p-8 ${
-        plan.highlighted ? 'border-pink bg-white shadow-2xl sm:-translate-y-4' : 'border-stone-200 bg-white'
+      className={`relative flex flex-1 flex-col rounded-3xl border p-8 ${
+        plan.highlighted
+          ? 'order-first border-2 border-pink bg-white shadow-xl sm:-translate-y-2 md:order-none'
+          : 'border-stone-200 bg-white'
       }`}
     >
+      {plan.highlighted && (
+        <span className="absolute -top-3 right-8 rounded-full bg-pink px-3 py-1 text-xs font-semibold text-white">
+          הכי משתלם
+        </span>
+      )}
+
       <div className="flex items-center justify-between">
         <span className="rounded-full bg-stone-100 px-3 py-1 text-sm font-semibold text-stone-600">{plan.fee}</span>
         <h3 className="text-2xl font-black">{plan.name}</h3>
@@ -112,20 +106,16 @@ function PricingCard({ plan }) {
 
 export default function Pricing() {
   return (
-    <section id="pricing" aria-label="פרייסינג" className="mx-auto max-w-[1560px] px-4 py-4 sm:px-8">
-      <div className="flex items-center justify-between gap-6 rounded-3xl bg-ink px-8 py-10 text-cloud sm:px-16">
-        <GiftRibbonIcon className="hidden h-24 w-auto shrink-0 text-emerald-400 sm:block" />
-        <div className="flex flex-col items-center gap-2 text-center">
-          <h2 className="text-2xl font-black sm:text-3xl">הצטרפו כעסק מייסד!</h2>
-          <p className="text-sm text-cloud/80 sm:text-base">
-            200 העסקים הראשונים מקבלים את תוכנית הפרו (₪99/חודש) בחינם למשך חצי שנה
-          </p>
-          <p className="text-xs text-cloud/60 sm:text-sm">מקומות מוגבלים • ללא התחייבות</p>
-        </div>
-        <GiftRibbonIcon className="hidden h-24 w-auto shrink-0 text-emerald-400 sm:block" />
-      </div>
+    <section id="pricing" aria-label="פרייסינג" className="mx-auto max-w-[1560px] px-4 py-16 sm:px-8 sm:py-20">
+      <hgroup className="flex flex-col items-center gap-2 text-center">
+        <p className="text-sm font-bold text-pink">הצטרפו כעסק מייסד</p>
+        <h2 className="text-2xl font-black sm:text-3xl">מסלול שמתאים לעסק שלכם</h2>
+        <p className="max-w-lg text-sm text-stone-500 sm:text-base">
+          200 העסקים הראשונים מקבלים את מסלול הפרו (₪99/חודש) בחינם למשך חצי שנה — ללא התחייבות
+        </p>
+      </hgroup>
 
-      <div className="mt-12 flex flex-col gap-8 pb-12 md:flex-row">
+      <div className="mt-12 flex flex-col gap-8 pb-12 md:flex-row md:items-stretch">
         {PLANS.map((plan) => (
           <PricingCard key={plan.id} plan={plan} />
         ))}

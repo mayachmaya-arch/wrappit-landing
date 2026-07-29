@@ -11,9 +11,10 @@ import Footer from './components/Footer';
 function App() {
   return (
     <div dir="rtl" className="min-h-screen overflow-x-hidden bg-cream text-ink">
-      {/* hero-viewport: min-height:100svh at lg+ only, so the hero fills the
-          initial viewport on desktop while mobile keeps its content-driven
-          height. overflow-x-hidden (not overflow-hidden) so the ticker's
+      {/* hero-viewport: min-height:100svh at every width, so only the hero
+          and its marquee band are visible before the user scrolls, on
+          phones as much as desktop. overflow-x-hidden (not overflow-hidden)
+          so the ticker's
           rotated band can bleed past the hero's bottom edge without being
           clipped. hero-viewport itself carries no background color — the
           dark backdrop lives only on the clipped wrapper below, so wherever

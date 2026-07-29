@@ -1,5 +1,6 @@
 import PhotoFrame from './PhotoFrame';
 import BridgeHeading from './BridgeHeading';
+import ScrollReveal from './ScrollReveal';
 
 // Plain /public paths (not ES imports) — dropping a real photo in with the
 // exact same filename replaces the placeholder automatically, no code change.
@@ -62,7 +63,7 @@ function StickyNote({ text, rotate, position }) {
 export default function ProblemSection() {
   return (
     <section id="problem" aria-label="הבעיה" className="mx-auto max-w-[1820px] px-4 py-24 sm:px-8 sm:py-32">
-      <div className="grid gap-20 lg:grid-cols-2 lg:gap-12">
+      <ScrollReveal className="grid gap-20 lg:grid-cols-2 lg:gap-12">
         <div className="flex flex-col items-center gap-10">
           <hgroup className="flex flex-col items-center gap-2 text-center">
             <p className="text-xl font-bold">מצד אחד</p>
@@ -104,7 +105,7 @@ export default function ProblemSection() {
             ))}
           </div>
         </div>
-      </div>
+      </ScrollReveal>
 
       <div className="mt-16">
         <BridgeHeading tagline="פתרון פשוט כל כך" />
