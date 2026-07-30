@@ -21,7 +21,7 @@ function RibbonIcon() {
   return (
     <svg
       viewBox="0 0 550 549"
-      className="size-5 shrink-0 text-cloud"
+      className="size-4 shrink-0 text-cloud lg:size-5"
       fill="none"
       aria-hidden="true"
       style={{ transform: 'rotate(-1.35deg)' }}
@@ -37,7 +37,7 @@ function RibbonIcon() {
 function MarqueeItem({ idea, ariaHidden = false }) {
   return (
     <span className="me-6 flex shrink-0 items-center gap-5" aria-hidden={ariaHidden}>
-      <span className="text-xl font-black whitespace-nowrap text-cloud sm:text-2xl">{idea}</span>
+      <span className="text-base font-black whitespace-nowrap text-cloud sm:text-2xl">{idea}</span>
       <RibbonIcon />
     </span>
   );
@@ -69,9 +69,9 @@ export default function Marquee() {
     // hero-viewport's flex layout at all, so it can extend past
     // hero-viewport's own bottom edge — hero-viewport's overflow-y stays
     // visible (see App.jsx's overflow-x-clip comment), so nothing clips
-    // that lower part off. bottom-[-45px] (mobile) / lg:bottom-[-69px]
+    // that lower part off. bottom-[-34px] (mobile) / lg:bottom-[-69px]
     // (desktop) position it so only its top ~37.5% sits above the fold at
-    // rest — h-[72px]*0.375≈27px visible / 45px below; h-[110px]*0.375≈
+    // rest — h-[54px]*0.375≈20px visible / 34px below; h-[110px]*0.375≈
     // 41px visible / 69px below — with the rest revealed by scrolling.
     //
     // left-1/2 + -translate-x-1/2 centers it width-wise regardless of
@@ -84,7 +84,7 @@ export default function Marquee() {
     // viewport boundary.
     <div
       aria-label="רעיונות למתנה"
-      className="absolute bottom-[-45px] left-1/2 h-[72px] w-[110vw] -translate-x-1/2 -rotate-[1.35deg] overflow-hidden bg-purple lg:bottom-[-69px] lg:h-[110px]"
+      className="absolute bottom-[-34px] left-1/2 h-[54px] w-[110vw] -translate-x-1/2 -rotate-[1.35deg] overflow-hidden bg-purple lg:bottom-[-69px] lg:h-[110px]"
     >
       {/* The purple background lives here, on this stationary band — never
           on the moving track. Previously bg-purple was on the animated

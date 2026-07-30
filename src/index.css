@@ -59,6 +59,16 @@ body {
   min-height: 100svh;
 }
 
+/* Below lg (1024px): reserve the home-indicator/gesture-bar safe area so it
+   never eats into the CTA or ticker. env() resolves to 0 on devices without
+   a safe area, so this is inert there — scoped to non-desktop widths purely
+   to keep the desktop layout's own bottom spacing untouched. */
+@media (max-width: 1023px) {
+  .hero-viewport {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
 /* +50%, not -50%: under RTL, the track (wider than its band) rests flush
    against the band's *right* edge by default block layout, with item 1
    nearest that right edge and each later item further left — so the
