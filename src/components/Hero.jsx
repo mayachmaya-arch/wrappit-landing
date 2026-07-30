@@ -94,7 +94,7 @@ export default function Hero() {
             href={OPEN_STORE_URL}
             className="flex h-[60px] items-center justify-center rounded-full bg-pink px-6 py-3 text-lg font-semibold whitespace-nowrap text-white transition-opacity hover:opacity-90"
           >
-            הצטרפו כעסק מייסד
+            לפתיחת חנות
           </a>
           <a
             href={BUY_GIFT_URL}
