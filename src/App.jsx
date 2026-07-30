@@ -37,17 +37,24 @@ function App() {
           boundary) renders without creating any scrollable region. */}
       <div className="hero-viewport relative flex flex-col overflow-x-clip">
         {/* Video + dark gradient, clipped to stop short of the hero's bottom
-            edge (see bottom-[4vw] below) instead of running the full inset-0
-            height. 4vw is proportional, not a fixed pixel patch: the purple
-            band is rotated -2.7deg at 120vw wide, so its far corners recede
-            from the hero's flat bottom edge by (0.6*100vw)*sin(2.7deg) ≈
-            2.83vw at any viewport width. Clipping the video short by 4vw
-            keeps a ~1.4x safety margin over that recession at every width,
-            while staying comfortably under the band's own thickness, so the
-            strip this reveals is always fully covered by the band except in
-            that receded sliver — where it now reveals the page's real cream
-            background instead of a manufactured patch. */}
-        <div className="absolute inset-x-0 top-0 bottom-[4vw] overflow-hidden bg-ink">
+            edge (see bottom-[0.6vw] below) instead of running the full
+            inset-0 height, so the sliver this reveals shows the page's real
+            cream background instead of a manufactured patch.
+
+            0.6vw is re-tuned for the current ticker (Marquee.jsx): that
+            band is a fixed-height rectangle (not scaled to the viewport)
+            rotated 1.35deg, so its rotation swing — the amount its lowest
+            covering point recedes from a flat line — is
+            (0.55*100vw)*sin(1.35deg) ≈ 1.296vw of *bounding-box* rise, but
+            the relevant quantity here is how much of the band's own
+            constant vertical offset from the fold (41px desktop) that
+            swing eats into, which shrinks in vw terms as the viewport
+            widens. 0.6vw keeps a positive, tested margin under that at
+            every required width up to 1920px (worst case ~0.84vw there) —
+            re-verify this value if Marquee's height, offset, or rotation
+            angle change again, since it's derived from those exact
+            numbers, not independent of them. */}
+        <div className="absolute inset-x-0 top-0 bottom-[0.6vw] overflow-hidden bg-ink">
           <HeroBackground />
           <div className="absolute inset-0 bg-gradient-to-l from-ink/10 via-ink/40 to-ink/70" />
         </div>

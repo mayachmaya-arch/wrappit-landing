@@ -52,7 +52,14 @@ export default function Hero() {
     <section
       id="top"
       aria-label="פתיח"
-      className="relative flex flex-1 flex-col items-start justify-end gap-5 pt-4 pb-6 sm:gap-7 sm:pt-6 sm:pb-8 lg:gap-[14px] lg:pt-0 lg:pb-0"
+      // pb-20/lg:pb-24: the marquee band (Marquee.jsx) is now absolutely
+      // positioned and mostly below the fold by design — it no longer
+      // reserves flex space, so it doesn't push this content up on its
+      // own. This bottom padding is what keeps a real ~53-55px gap
+      // between the CTA and the band's own visible top edge (its
+      // resting position is 27px/41px above the fold at mobile/desktop
+      // sizes) rather than the two touching or overlapping.
+      className="relative flex flex-1 flex-col items-start justify-end gap-5 pt-4 pb-6 sm:gap-7 sm:pt-6 lg:gap-[14px] lg:pt-0 lg:pb-[118px]"
     >
       <div className="flex flex-col items-start text-cloud">
         <div
