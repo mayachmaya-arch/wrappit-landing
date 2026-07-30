@@ -170,3 +170,39 @@ body {
     animation: none;
   }
 }
+
+/* ProblemSection's sticky notes "slap" onto their photo once, staggered,
+   when the section scrolls into view. --sticker-rotate carries each note's
+   own final rotation (set inline per-note) so the keyframe can animate
+   through a slightly larger, more-rotated start without hardcoding any
+   note's individual angle here. animation-fill-mode:both (via the
+   shorthand's trailing "both") holds the 0% state through the
+   animation-delay (so a later-staggered note doesn't flash into view early)
+   and holds the 100% state afterward (so it doesn't snap back to a CSS
+   default once the animation completes). The single overshoot at 70% (scale
+   1.05 before settling to 1) is deliberately the only bounce — no further
+   oscillation — to stay "playful but controlled" rather than springy. */
+@keyframes sticker-slap {
+  0% {
+    opacity: 0;
+    transform: translateY(-14px) scale(1.18) rotate(calc(var(--sticker-rotate) + 6deg));
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(0) scale(1.05) rotate(var(--sticker-rotate));
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(var(--sticker-rotate));
+  }
+}
+
+.animate-sticker-slap {
+  animation: sticker-slap 400ms cubic-bezier(0.34, 1.15, 0.64, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-sticker-slap {
+    animation: none;
+  }
+}
