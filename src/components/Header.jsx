@@ -12,7 +12,7 @@ const OPEN_STORE_URL = 'https://gift-wish-unfold.vercel.app/business/onboarding?
 
 export default function Header() {
   return (
-    <header className="relative z-20 flex w-full items-center justify-between gap-6 rounded-2xl px-0 py-3 drop-shadow-[0_6px_9px_rgba(0,0,0,0.05)] sm:px-8 sm:py-6">
+    <header className="relative z-20 flex w-full items-center justify-between gap-6 rounded-2xl py-3 drop-shadow-[0_6px_9px_rgba(0,0,0,0.05)] sm:py-6">
       <a href="#top" className="shrink-0 font-logo text-[39px] leading-none text-cloud sm:text-4xl lg:text-5xl">
         Wrappit
       </a>

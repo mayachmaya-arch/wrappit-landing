@@ -58,7 +58,7 @@ function App() {
           <HeroBackground />
           <div className="absolute inset-0 bg-gradient-to-l from-ink/10 via-ink/40 to-ink/70" />
         </div>
-        <div className="relative z-10 mx-auto flex w-full max-w-[1820px] flex-1 flex-col px-5 pt-4 sm:px-8 sm:pt-6">
+        <div className="site-container relative z-10 mx-auto flex max-w-[1820px] flex-1 flex-col pt-4 sm:pt-6">
           <Header />
           <Hero />
         </div>
