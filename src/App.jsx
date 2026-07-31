@@ -3,6 +3,7 @@ import Hero from './components/Hero';
 import HeroBackground from './components/HeroBackground';
 import Marquee from './components/Marquee';
 import ProblemSection from './components/ProblemSection';
+import StorySectionV2 from './components/StorySectionV2';
 import GiftCollage from './components/GiftCollage';
 import HowItWorks from './components/HowItWorks';
 import Pricing from './components/Pricing';
@@ -66,6 +67,14 @@ function App() {
       </div>
 
       <ProblemSection />
+
+      {/* StorySectionV2: rendered here temporarily, directly under the
+          original ProblemSection, purely so both are visible in the same
+          live preview for side-by-side comparison. ProblemSection.jsx
+          itself is untouched — remove this block (and its import above)
+          once a decision is made on which section to keep. */}
+      <StorySectionV2 />
+
       <GiftCollage />
       <HowItWorks />
       <Pricing />
