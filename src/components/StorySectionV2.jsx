@@ -1,90 +1,37 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import PhotoFrame from './PhotoFrame';
 import BridgeHeading from './BridgeHeading';
 import useInView from '../hooks/useInView';
 
-// Duplicated from ProblemSection.jsx as the starting point for this rewrite
-// (see PR notes) — ProblemSection.jsx itself is untouched. Same buyer photo;
-// same four business photos, since no flowers/pottery/jewelry/bakery
-// photography exists anywhere in this repo (checked public/images — still
-// only buyer-photo + business-photo-1..4). The story concept (frustration →
-// discovery → thriving businesses) is told through composition and motion
-// instead, not through swapping in different subject matter.
+// Same assets/text as the previous StorySectionV2 iteration and, before
+// that, ProblemSection.jsx — still no flowers/pottery/jewelry/bakery/café
+// photography anywhere in this repo (checked public/images again). This
+// revision changes the SEQUENCE (buyer only → problems attach → layout
+// shifts open → businesses reveal) and the label styling, reusing the same
+// buyer photo, the same four business photos, and the same problem
+// concepts from the prior iteration's search cards (condensed to one line
+// each per the new spec) rather than introducing new subject matter.
 const buyerPhoto = '/images/buyer-photo.jpg';
 
-// Six failed-search UI cards forming a "messy cloud" around the buyer photo,
-// not a tidy ring. depth:'back' cards sit at -z-10 — genuinely behind the
-// photo (PhotoFrame is itself position:relative, so it participates in the
-// same stacking context), not just visually layered — so the photo's own
-// rounded edge crops them for real, matching "some partially cropped."
-const SEARCH_CARDS = [
-  {
-    icon: '🔍',
-    title: 'מתנה לאבא...',
-    subtitle: 'יותר מדי תוצאות',
-    rotate: '-7deg',
-    size: 'lg',
-    depth: 'front',
-    position: 'top-[0%] right-[2%]',
-  },
-  {
-    icon: '🔍',
-    title: 'מתנה בעבודת יד',
-    subtitle: 'שום דבר בקרבת מקום',
-    rotate: '5deg',
-    size: 'md',
-    depth: 'back',
-    position: 'top-[10%] -right-[3%]',
-  },
-  {
-    icon: '📦',
-    title: 'משלוח',
-    subtitle: 'לא יגיע עד מחר',
-    rotate: '-4deg',
-    size: 'sm',
-    depth: 'front',
-    position: 'top-[40%] -left-[5%]',
-  },
-  {
-    icon: '💳',
-    title: 'כרטיס מתנה',
-    subtitle: 'גנרי מדי',
-    rotate: '6deg',
-    size: 'md',
-    depth: 'back',
-    position: 'bottom-[32%] -right-[2%]',
-  },
-  {
-    icon: '⭐',
-    title: 'דירוג 3.8',
-    subtitle: 'לא בטוחה...',
-    rotate: '-8deg',
-    size: 'sm',
-    depth: 'front',
-    position: 'bottom-[8%] right-[6%]',
-  },
-  {
-    icon: '💸',
-    title: 'מעל התקציב',
-    subtitle: '',
-    rotate: '4deg',
-    size: 'sm',
-    depth: 'back',
-    position: 'bottom-[0%] left-[0%]',
-  },
+// Six anchors in a balanced ring around the photo's edges — two top
+// corners, two mid-height edges, two bottom corners — deliberately leaving
+// the upper-center clear (that's where the buyer's face sits in the
+// photo). Each overlaps the photo edge slightly (small, not extreme,
+// negative offsets) so it reads as physically attached rather than
+// floating nearby, and rotation is held to the -4deg..4deg range asked
+// for — tighter than ProblemSection's stickers or this component's
+// previous search cards.
+const PROBLEM_LABELS = [
+  { text: '🔍 יותר מדי תוצאות', rotate: '-3deg', position: '-top-[3%] -right-[4%]' },
+  { text: '🔍 שום דבר בקרבת מקום', rotate: '3deg', position: '-top-[2%] -left-[4%]' },
+  { text: '📦 לא יגיע עד מחר', rotate: '-2deg', position: 'top-[42%] -right-[6%]' },
+  { text: '💳 מתנה גנרית מדי', rotate: '4deg', position: 'top-[46%] -left-[6%]' },
+  { text: '⭐ דירוג 3.8 בלבד', rotate: '-4deg', position: 'bottom-[2%] -right-[3%]' },
+  { text: '💸 מעל התקציב', rotate: '2deg', position: 'bottom-[0%] -left-[2%]' },
 ];
 
-const CARD_SIZE_CLASSES = {
-  sm: 'w-32 gap-0.5 p-2.5 text-[11px]',
-  md: 'w-40 gap-1 p-3 text-xs',
-  lg: 'w-48 gap-1 p-3.5 text-sm',
-};
-
-// Editorial collage, absolute-positioned rather than gridded so sizes,
-// overlap and depth read as art-directed. business-photo-2 (vegetable
-// market) is the large anchor photo; the other three are smaller, rotated,
-// and overlap its corners at increasing z so the stack reads as a pile of
-// discoveries rather than four tiles.
+// Unchanged from the previous iteration: an editorial collage (varied
+// size/rotation/z, not a grid) built from the same four business photos.
 const COLLAGE_PHOTOS = [
   {
     src: '/images/business-photo-2.jpg',
@@ -116,136 +63,82 @@ const COLLAGE_PHOTOS = [
   },
 ];
 
-// A floating UI card, not a paper sticky note: white surface, generous
-// radius, a soft diffuse shadow (vs. the tight "resting on paper" shadow
-// used for ProblemSection's stickers). Two elements deep on purpose — the
-// outer div owns the one-shot "arrives and settles" entrance (opacity/
-// scale/rotate via the animate-card-enter keyframe, index.css), the inner
-// div owns the *separate*, continuous animate-card-float loop. They have to
-// be different elements: both animate `transform`, and a single element
-// can't run a one-shot entrance and an infinite loop on the same property
-// without one silently overriding the other once the entrance's
-// fill-mode:both takes hold.
-function SearchCard({ icon, title, subtitle, rotate, position, size, depth, index, inView, reducedMotion }) {
-  const playEntrance = inView && !reducedMotion;
+// Stage-2 timing: labels start once the buyer photo has mostly settled in
+// (Stage 1) and stagger on one at a time. Paper-label styling per the
+// brief — soft pale yellow, small consistent radius/padding, a much
+// lighter shadow than a UI card, and no continuous motion once attached
+// (animate-label-attach is a one-shot "settle," nothing loops).
+const LABEL_STAGGER_MS = 150;
+const LABEL_START_MS = 350;
+
+function ProblemLabel({ text, rotate, position, index, inView, reducedMotion }) {
+  const play = inView && !reducedMotion;
   return (
-    <div
-      className={`absolute ${position} ${depth === 'back' ? '-z-10' : 'z-20'} ${playEntrance ? 'animate-card-enter' : ''}`}
+    <p
+      className={`absolute ${position} z-20 rounded-lg px-3 py-1.5 text-sm font-semibold whitespace-nowrap text-ink shadow-[0_2px_5px_rgba(31,40,52,0.14)] ${play ? 'animate-label-attach' : ''}`}
       style={{
-        '--card-rotate': rotate,
+        backgroundColor: '#FFF58A',
+        '--label-rotate': rotate,
         transform: `rotate(${rotate})`,
         opacity: reducedMotion || inView ? undefined : 0,
-        animationDelay: playEntrance ? `${index * 130}ms` : undefined,
+        animationDelay: play ? `${LABEL_START_MS + index * LABEL_STAGGER_MS}ms` : undefined,
       }}
     >
-      <div
-        className={!reducedMotion ? 'animate-card-float' : ''}
-        style={{
-          animationDelay: `${(index % 3) * 900 + 500}ms`,
-          animationDuration: `${5.5 + (index % 3) * 0.7}s`,
-        }}
-      >
-        <div
-          className={`${CARD_SIZE_CLASSES[size]} ${depth === 'back' ? 'opacity-85' : ''} flex flex-col rounded-2xl bg-cloud shadow-[0_14px_30px_rgba(31,40,52,0.16)] ring-1 ring-ink/[0.06]`}
-        >
-          <p className="font-semibold whitespace-nowrap text-ink">
-            {icon} {title}
-          </p>
-          {subtitle && <p className="whitespace-nowrap text-ink/45">{subtitle}</p>}
-        </div>
-      </div>
-    </div>
+      {text}
+    </p>
   );
 }
 
-// Same two-element split as SearchCard, same reason: the outer div owns the
-// one-shot animate-collage-enter (opacity/scale/rotate), the inner div owns
-// the continuous scroll-driven parallax translateY — a *value this
-// component computes every frame from scroll position*, not a CSS
-// animation, so it has to live on an element with no competing `transform`
-// animation of its own or the parallax offset would be silently discarded
-// once the entrance's fill-mode:both locks its own transform in.
-function CollagePhoto({ src, alt, box, rotate, z, index, inView, reducedMotion, parallax }) {
-  const playEntrance = inView && !reducedMotion;
+// Stage-4b timing: collage photos start staggering in only once the layout
+// shift (Stage 3) is well underway, so the business side's photos arrive
+// as the column actually has room for them rather than appearing early
+// and getting clipped by the still-narrow track.
+const COLLAGE_STAGGER_MS = 160;
+const COLLAGE_START_MS = 2000;
+
+function CollagePhoto({ src, alt, box, rotate, z, index, inView, reducedMotion }) {
+  const play = inView && !reducedMotion;
   return (
     <div
-      className={`absolute ${box} ${playEntrance ? 'animate-collage-enter' : ''}`}
+      className={`absolute ${box} ${play ? 'animate-collage-enter' : ''}`}
       style={{
         zIndex: z,
         '--collage-rotate': rotate,
         transform: `rotate(${rotate})`,
         opacity: reducedMotion || inView ? undefined : 0,
-        animationDelay: playEntrance ? `${350 + index * 150}ms` : undefined,
+        animationDelay: play ? `${COLLAGE_START_MS + index * COLLAGE_STAGGER_MS}ms` : undefined,
       }}
     >
-      <div
-        className="h-full w-full"
-        style={
-          reducedMotion
-            ? undefined
-            : { transform: `translateY(${parallax}px)`, transition: 'transform 120ms linear' }
-        }
-      >
-        <PhotoFrame
-          src={src}
-          alt={alt}
-          gradient="from-amber-100 via-stone-100 to-stone-200"
-          className="h-full w-full shadow-[0_18px_36px_rgba(31,40,52,0.18)]"
-        />
-      </div>
+      <PhotoFrame
+        src={src}
+        alt={alt}
+        gradient="from-amber-100 via-stone-100 to-stone-200"
+        className="h-full w-full shadow-[0_18px_36px_rgba(31,40,52,0.18)]"
+      />
     </div>
   );
 }
 
 export default function StorySectionV2() {
-  // One shared IntersectionObserver (via useInView) drives every phase of
-  // the story in sequence: the frustration cards stagger in first, the
-  // transition line fades in as their tail overlaps it, then the discovery
-  // collage staggers in last — animationDelay offsets below encode that
-  // order, all keyed off this single inView flip so the section only tells
-  // its story once, the moment it's actually seen.
+  // The entire 4-stage sequence is keyed off this single inView flip, the
+  // same pattern as every other scroll-entrance animation in this
+  // codebase — no scroll-jacking, no setTimeout state machine: every
+  // stage's start time is just a CSS animation-delay/transition-delay
+  // computed against t=0 (the moment inView becomes true), so the browser
+  // owns the timing and the user can keep scrolling through the section
+  // at any point without anything fighting their scroll position.
   const [ref, inView] = useInView({ threshold: 0.15 });
   const [reducedMotion] = useState(
     () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   );
 
-  // Gentle scroll-linked parallax for the collage only (not a CSS
-  // scroll-timeline — Safari/Firefox support for animation-timeline:view()
-  // is still inconsistent, so a plain rAF-throttled scroll listener reaches
-  // every browser). Range is deliberately small (±14px) per "gentle
-  // parallax... no dramatic motion."
-  const collageRef = useRef(null);
-  const [parallax, setParallax] = useState(0);
-
-  useEffect(() => {
-    if (reducedMotion) return undefined;
-    let raf = null;
-    function measure() {
-      raf = null;
-      const node = collageRef.current;
-      if (!node) return;
-      const rect = node.getBoundingClientRect();
-      const viewportMid = window.innerHeight / 2;
-      const elementMid = rect.top + rect.height / 2;
-      const distance = (viewportMid - elementMid) / viewportMid;
-      setParallax(Math.max(-14, Math.min(14, distance * 14)));
-    }
-    function onScroll() {
-      if (raf) return;
-      raf = requestAnimationFrame(measure);
-    }
-    window.addEventListener('scroll', onScroll, { passive: true });
-    measure();
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [reducedMotion]);
-
-  const revealClassName = reducedMotion
-    ? ''
-    : `transition-all duration-700 ease-out ${inView ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`;
-  const playTransition = inView && !reducedMotion;
+  const play = inView && !reducedMotion;
+  // Under reduced motion, per useInView's own contract, skip the animation
+  // (not the content) — render the fully-settled two-sided layout
+  // immediately regardless of scroll position, rather than withholding the
+  // business side until some hidden trigger the user has opted out of ever
+  // seeing play.
+  const settled = reducedMotion || inView;
 
   return (
     <section
@@ -253,57 +146,95 @@ export default function StorySectionV2() {
       aria-label="הסיפור של Wrappit"
       className="mx-auto max-w-[1820px] px-4 py-24 sm:px-8 sm:py-32"
     >
-      {/* flex-col (mobile): DOM order alone gives the requested vertical
-          narrative — frustration, then transition, then discovery — top to
-          bottom, no reordering needed. lg:grid-cols-[1fr_auto_1fr]: under
-          dir="rtl" (set on the page root), grid column 1 renders on the
-          *right*, so this same DOM order places frustration on the right
-          and discovery on the left with zero order-* overrides either. */}
+      {/* Mobile (base): flex-col, so DOM order alone gives the requested
+          vertical sequence (buyer heading → image/labels → business
+          heading → collage) with no shift/collapse mechanics needed —
+          the business block is simply further down the page until its own
+          opacity/translate delay fires.
+          Below lg: a single-column grid whose *second row* animates from
+          0fr to 1fr — the well-known CSS "0fr/1fr" trick for animating an
+          element's height without knowing its pixel height up front (the
+          element's own min-height:auto would otherwise block a 0-height
+          row; see the business wrapper's min-h-0 below). Without this the
+          business block, though invisible, would still reserve its full
+          layout height and leave a dead gap under the buyer photo during
+          Stage 1-2 — this keeps that space genuinely collapsed instead.
+          lg+: the same trick applied to *columns* instead of rows for
+          Stage 3's "shift" — the second track animates 0fr to 1fr, so
+          while it's 0fr the business column has zero width (genuinely not
+          there, not just transparent), and the single 1fr buyer column
+          spans the full section width on its own, which is what actually
+          centers the buyer composition during Stage 1-2 (no
+          transform-based fake-centering needed). As the second track
+          grows, the grid reflows and the buyer column narrows/shifts
+          right by itself. grid-template-rows is pinned to a single fixed
+          row at lg+ since the reveal there is column-driven, not
+          row-driven. */}
       <div
         ref={ref}
-        className={`flex flex-col gap-16 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-8 xl:gap-14 ${revealClassName}`}
+        className={`grid grid-cols-1 gap-16 transition-[grid-template-rows] duration-[800ms] delay-[1650ms] ease-out lg:items-center lg:gap-8 lg:transition-[grid-template-columns] lg:duration-[1000ms] lg:delay-[1650ms] lg:ease-out xl:gap-14 ${
+          settled
+            ? '[grid-template-rows:auto_1fr] lg:[grid-template-columns:1fr_1fr] lg:[grid-template-rows:1fr]'
+            : '[grid-template-rows:auto_0fr] lg:[grid-template-columns:1fr_0fr] lg:[grid-template-rows:1fr]'
+        }`}
       >
-        <div className="relative mx-auto w-full max-w-sm px-8 py-12 sm:max-w-md">
-          <PhotoFrame
-            src={buyerPhoto}
-            alt="קונה מתנות מביטה בטלפון בתסכול, מוקפת באפשרויות מתנה אינסופיות"
-            className="aspect-[3/4] w-full shadow-[0_20px_40px_rgba(31,40,52,0.18)]"
-            gradient="from-rose-200 via-rose-100 to-amber-100"
-          />
-          {SEARCH_CARDS.map((card, index) => (
-            <SearchCard
-              key={card.title + card.subtitle}
-              {...card}
-              index={index}
-              inView={inView}
-              reducedMotion={reducedMotion}
-            />
-          ))}
-        </div>
-
+        {/* Stage 1 + 2: buyer heading/photo, then the six problem labels */}
         <div
-          className={`mx-auto flex max-w-xs flex-col items-center gap-2 text-center ${playTransition ? 'animate-transition-enter' : ''}`}
-          style={{
-            opacity: reducedMotion || inView ? undefined : 0,
-            animationDelay: playTransition ? '650ms' : undefined,
-          }}
+          className={`flex flex-col items-center gap-8 ${play ? 'animate-buyer-enter' : ''}`}
+          style={{ opacity: settled ? undefined : 0, animationDelay: play ? '0ms' : undefined }}
         >
-          <p className="text-lg font-semibold text-ink/70">ואז גילית את</p>
-          <p className="font-logo text-4xl leading-none text-pink sm:text-5xl">Wrappit</p>
-          <p className="text-base text-ink/60">והכל נהיה פשוט</p>
+          <hgroup className="flex flex-col items-center gap-2 text-center">
+            <p className="text-xl font-bold text-pink">מצד אחד</p>
+            <h2 className="text-3xl sm:text-4xl">קונה מתנה</h2>
+          </hgroup>
+          <div className="relative w-full max-w-sm px-8 py-10 sm:max-w-md">
+            <PhotoFrame
+              src={buyerPhoto}
+              alt="קונה מתנות מביטה בטלפון בתסכול, מוקפת באפשרויות מתנה אינסופיות"
+              className="aspect-[3/4] w-full shadow-[0_20px_40px_rgba(31,40,52,0.18)]"
+              gradient="from-rose-200 via-rose-100 to-amber-100"
+            />
+            {PROBLEM_LABELS.map((label, index) => (
+              <ProblemLabel
+                key={label.text}
+                {...label}
+                index={index}
+                inView={inView}
+                reducedMotion={reducedMotion}
+              />
+            ))}
+          </div>
         </div>
 
-        <div ref={collageRef} className="relative mx-auto aspect-[4/5] w-full max-w-sm sm:max-w-md">
-          {COLLAGE_PHOTOS.map((photo, index) => (
-            <CollagePhoto
-              key={photo.src}
-              {...photo}
-              index={index}
-              inView={inView}
-              reducedMotion={reducedMotion}
-              parallax={parallax}
-            />
-          ))}
+        {/* Stage 3 + 4: business side. overflow-hidden + min-h-0/lg:min-w-0
+            on this outer element is what lets its grid track actually
+            collapse to 0fr — a grid item's default min-height/min-width is
+            auto, i.e. "at least my content's size," which would otherwise
+            block the track from ever reaching 0 (below lg: the row; at
+            lg+: the column). The inner content below keeps its own
+            natural size/animations regardless of the outer track's
+            current animated size. */}
+        <div className="min-h-0 overflow-hidden lg:min-w-0">
+          <div className="mx-auto flex w-full max-w-sm flex-col items-center gap-8 sm:max-w-md">
+            <hgroup
+              className={`flex flex-col items-center gap-2 text-center ${play ? 'animate-transition-enter' : ''}`}
+              style={{ opacity: settled ? undefined : 0, animationDelay: play ? '1700ms' : undefined }}
+            >
+              <p className="text-xl font-bold text-pink">מצד שני</p>
+              <h2 className="text-3xl sm:text-4xl">בעלי עסקים</h2>
+            </hgroup>
+            <div className="relative aspect-[4/5] w-full">
+              {COLLAGE_PHOTOS.map((photo, index) => (
+                <CollagePhoto
+                  key={photo.src}
+                  {...photo}
+                  index={index}
+                  inView={inView}
+                  reducedMotion={reducedMotion}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 

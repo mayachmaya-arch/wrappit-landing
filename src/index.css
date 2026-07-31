@@ -208,62 +208,63 @@ body {
 }
 
 /* StorySectionV2 only (ProblemSection.jsx keeps the sticker-slap set above
-   untouched). Deliberately calmer than the sticky-note "slap": no
-   overshoot, a longer settle — "premium... not playful" per the brief. */
-@keyframes card-enter {
+   untouched). Stage 1: the buyer heading+photo block's one-shot entrance —
+   a plain rise+fade+very slight scale, calmer than anything used for the
+   labels or collage since it's the section's opening beat. */
+@keyframes buyer-enter {
   0% {
     opacity: 0;
-    transform: translateY(-16px) scale(1.1) rotate(calc(var(--card-rotate) + 5deg));
+    transform: translateY(14px) scale(0.97);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1) rotate(var(--card-rotate));
+    transform: translateY(0) scale(1);
   }
 }
 
-.animate-card-enter {
-  animation: card-enter 450ms cubic-bezier(0.22, 1, 0.36, 1) both;
+.animate-buyer-enter {
+  animation: buyer-enter 550ms ease-out both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-card-enter {
+  .animate-buyer-enter {
     animation: none;
   }
 }
 
-/* Continuous, subtle float for the settled search cards — a few px of
-   vertical drift, nothing that reads as bouncing. Runs on a separate inner
-   element from animate-card-enter (see StorySectionV2's SearchCard) so the
-   one-shot entrance and this infinite loop don't fight over `transform` on
-   the same node. animation-delay/-duration are set inline per card so the
-   "messy cloud" drifts out of sync rather than in unison. */
-@keyframes card-float {
-  0%,
+/* Stage 2: each problem label "attaches" to the buyer photo once, staggered
+   — no overshoot bounce (kept to a plain ease-out settle) and a smaller
+   start offset/rotation delta than ProblemSection's sticker-slap, per
+   "clean and professionally art-directed" rather than playful. Nothing
+   loops after this: labels have no continuous-motion animation at all,
+   unlike this component's previous iteration. */
+@keyframes label-attach {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scale(1.06) rotate(calc(var(--label-rotate) + 4deg));
+  }
   100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(var(--label-rotate));
   }
 }
 
-.animate-card-float {
-  animation: card-float 6s ease-in-out infinite;
+.animate-label-attach {
+  animation: label-attach 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-card-float {
+  .animate-label-attach {
     animation: none;
   }
 }
 
-/* Discovery-collage photo entrance: a soft scale+fade rather than the
-   search cards' translateY drop, so the two sides of the story read as
-   distinct movements — arriving into frustration vs. gently opening into
-   discovery. Same two-element split rationale as .animate-card-float: the
-   scroll-driven parallax translateY (set via inline style, StorySectionV2's
-   CollagePhoto) lives on a separate inner element so it isn't clobbered by
-   this animation's fill-mode:both once it completes. */
+/* Stage 4b: discovery-collage photo entrance — a soft scale+fade, staggered,
+   once the business column has opened up (see StorySectionV2's
+   grid-template-columns transition). No continuous parallax in this
+   revision — the previous iteration's scroll-linked parallax was dropped
+   along with its two-element split, since nothing here still needs a
+   second `transform` animation on the same element. */
 @keyframes collage-enter {
   0% {
     opacity: 0;
@@ -285,9 +286,9 @@ body {
   }
 }
 
-/* The center "ואז גילית את Wrappit" transition line: a plain fade/rise,
-   intentionally the quietest motion in the section — it's a punctuation
-   mark between the two story beats, not another attention-grabbing element. */
+/* Stage 4a: the "מצד שני / בעלי עסקים" heading's entrance — a plain
+   fade/rise, intentionally the quietest motion in the section, timed to
+   start as the grid-template-columns shift (Stage 3) opens up its column. */
 @keyframes story-transition-enter {
   0% {
     opacity: 0;
