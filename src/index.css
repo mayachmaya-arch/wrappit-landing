@@ -171,128 +171,42 @@ body {
   }
 }
 
-/* ProblemSection's sticky notes "slap" onto their photo once, staggered,
-   when the section scrolls into view. --sticker-rotate carries each note's
-   own final rotation (set inline per-note) so the keyframe can animate
-   through a slightly larger, more-rotated start without hardcoding any
-   note's individual angle here. animation-fill-mode:both (via the
-   shorthand's trailing "both") holds the 0% state through the
-   animation-delay (so a later-staggered note doesn't flash into view early)
-   and holds the 100% state afterward (so it doesn't snap back to a CSS
-   default once the animation completes). The single overshoot at 70% (scale
-   1.05 before settling to 1) is deliberately the only bounce — no further
-   oscillation — to stay "playful but controlled" rather than springy. */
-@keyframes sticker-slap {
-  0% {
-    opacity: 0;
-    transform: translateY(-14px) scale(1.18) rotate(calc(var(--sticker-rotate) + 6deg));
+/* Journey scenes (Hero → Pricing, the cinematic redesign): a slow,
+   continuous zoom on real photography — the classic "Ken Burns" technique
+   — used deliberately instead of any illustration or decorative motion,
+   since the photography itself is meant to carry the cinematic weight.
+   Applied via PhotoFrame's imgClassName so it scales only the <img> inside
+   its fixed, clipped frame, never the frame/shadow around it.
+   animation-fill-mode:forwards holds the zoomed-in end state rather than
+   resetting or looping — these photos stay on screen a while, and a
+   snap-back or repeat would read as a glitch, not a film. */
+@keyframes ken-burns {
+  from {
+    transform: scale(1);
   }
-  70% {
-    opacity: 1;
-    transform: translateY(0) scale(1.05) rotate(var(--sticker-rotate));
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1) rotate(var(--sticker-rotate));
+  to {
+    transform: scale(1.06);
   }
 }
 
-.animate-sticker-slap {
-  animation: sticker-slap 400ms cubic-bezier(0.34, 1.15, 0.64, 1) both;
+.animate-ken-burns {
+  animation: ken-burns 16s ease-out forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-sticker-slap {
+  .animate-ken-burns {
     animation: none;
   }
 }
 
-/* StorySectionV2 only (ProblemSection.jsx keeps the sticker-slap set above
-   untouched). Stage 1: the buyer heading+photo block's one-shot entrance —
-   a plain rise+fade+very slight scale, calmer than anything used for the
-   labels or collage since it's the section's opening beat. */
-@keyframes buyer-enter {
+/* One calm, one-shot fade+rise for every headline/caption across the
+   journey scenes — deliberately the same restrained treatment everywhere
+   (no bounce, no overshoot) so the scenes read as one continuous film
+   rather than a handful of different component demos stitched together. */
+@keyframes scene-text-in {
   0% {
     opacity: 0;
-    transform: translateY(14px) scale(0.97);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.animate-buyer-enter {
-  animation: buyer-enter 550ms ease-out both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-buyer-enter {
-    animation: none;
-  }
-}
-
-/* Stage 2: each problem label "attaches" to the buyer photo once, staggered
-   — no overshoot bounce (kept to a plain ease-out settle) and a smaller
-   start offset/rotation delta than ProblemSection's sticker-slap, per
-   "clean and professionally art-directed" rather than playful. Nothing
-   loops after this: labels have no continuous-motion animation at all,
-   unlike this component's previous iteration. */
-@keyframes label-attach {
-  0% {
-    opacity: 0;
-    transform: translateY(-10px) scale(1.06) rotate(calc(var(--label-rotate) + 4deg));
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1) rotate(var(--label-rotate));
-  }
-}
-
-.animate-label-attach {
-  animation: label-attach 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-label-attach {
-    animation: none;
-  }
-}
-
-/* Stage 4b: discovery-collage photo entrance — a soft scale+fade, staggered,
-   once the business column has opened up (see StorySectionV2's
-   grid-template-columns transition). No continuous parallax in this
-   revision — the previous iteration's scroll-linked parallax was dropped
-   along with its two-element split, since nothing here still needs a
-   second `transform` animation on the same element. */
-@keyframes collage-enter {
-  0% {
-    opacity: 0;
-    transform: scale(0.94) rotate(calc(var(--collage-rotate) + 3deg));
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) rotate(var(--collage-rotate));
-  }
-}
-
-.animate-collage-enter {
-  animation: collage-enter 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-collage-enter {
-    animation: none;
-  }
-}
-
-/* Stage 4a: the "מצד שני / בעלי עסקים" heading's entrance — a plain
-   fade/rise, intentionally the quietest motion in the section, timed to
-   start as the grid-template-columns shift (Stage 3) opens up its column. */
-@keyframes story-transition-enter {
-  0% {
-    opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(16px);
   }
   100% {
     opacity: 1;
@@ -300,12 +214,37 @@ body {
   }
 }
 
-.animate-transition-enter {
-  animation: story-transition-enter 600ms ease-out both;
+.animate-scene-text-in {
+  animation: scene-text-in 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-transition-enter {
+  .animate-scene-text-in {
+    animation: none;
+  }
+}
+
+/* Same entrance language as scene-text-in, with a touch more scale — for
+   the "poster" photography (JourneyCoffeeReveal, JourneyDiscoveries), which
+   benefits from a bit more physical presence arriving than a line of type
+   does. */
+@keyframes scene-photo-in {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-scene-photo-in {
+  animation: scene-photo-in 750ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-scene-photo-in {
     animation: none;
   }
 }

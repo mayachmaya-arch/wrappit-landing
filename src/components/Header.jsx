@@ -1,7 +1,6 @@
 const NAV_LINKS = [
-  { label: 'ככה זה עובד, הכי פשוט בעולם!', href: '#how-it-works' },
-  { label: 'הפתרון שלנו', href: '#solution' },
-  { label: 'מה שקיים היום', href: '#problem' },
+  { label: 'גלו מתנות מפתיעות', href: '#discover' },
+  { label: 'המסלולים לעסקים', href: '#pricing' },
 ];
 
 // Production app (gift-wish-unfold): existing routes, not new pages —

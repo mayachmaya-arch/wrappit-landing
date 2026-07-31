@@ -2,10 +2,11 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import HeroBackground from './components/HeroBackground';
 import Marquee from './components/Marquee';
-import ProblemSection from './components/ProblemSection';
-import StorySectionV2 from './components/StorySectionV2';
-import GiftCollage from './components/GiftCollage';
-import HowItWorks from './components/HowItWorks';
+import JourneySpark from './components/JourneySpark';
+import JourneyPause from './components/JourneyPause';
+import JourneyCoffeeReveal from './components/JourneyCoffeeReveal';
+import JourneyDiscoveries from './components/JourneyDiscoveries';
+import JourneyBridge from './components/JourneyBridge';
 import Pricing from './components/Pricing';
 import Footer from './components/Footer';
 
@@ -66,17 +67,19 @@ function App() {
         <Marquee />
       </div>
 
-      <ProblemSection />
+      {/* The cinematic journey: Hero → Pricing. Five short scenes, each one
+          emotional beat, continuing Hero's own dark-photo/overlaid-type
+          visual mode before settling into the lighter "poster on cream"
+          language for the discovery beats. Replaces the old
+          ProblemSection/StorySectionV2/GiftCollage/HowItWorks section
+          quartet entirely — recoverable from git history if ever needed,
+          not deleted from disk without a trace. */}
+      <JourneySpark />
+      <JourneyPause />
+      <JourneyCoffeeReveal />
+      <JourneyDiscoveries />
+      <JourneyBridge />
 
-      {/* StorySectionV2: rendered here temporarily, directly under the
-          original ProblemSection, purely so both are visible in the same
-          live preview for side-by-side comparison. ProblemSection.jsx
-          itself is untouched — remove this block (and its import above)
-          once a decision is made on which section to keep. */}
-      <StorySectionV2 />
-
-      <GiftCollage />
-      <HowItWorks />
       <Pricing />
       <Footer />
     </div>
