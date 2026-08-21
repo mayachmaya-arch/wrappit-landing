@@ -59,6 +59,43 @@ body {
   min-height: 100svh;
 }
 
+/* Below lg (1024px): reserve the home-indicator/gesture-bar safe area so it
+   never eats into the CTA or ticker. env() resolves to 0 on devices without
+   a safe area, so this is inert there — scoped to non-desktop widths purely
+   to keep the desktop layout's own bottom spacing untouched. */
+@media (max-width: 1023px) {
+  .hero-viewport {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Single shared horizontal-inset source for the header + hero block (both
+   render inside this one container in App.jsx — never their own competing
+   padding) so their content's right edge (RTL start edge) always lands on
+   the exact same vertical line. Previously Header.jsx carried its own
+   px-4/sm:px-8 on top of this wrapper's, doubling its inset to 64px at
+   desktop while Hero's content — parented by this container with no
+   padding of its own — sat at 32px, a real 32px misalignment between the
+   two. 20px/32px/100px are mobile/tablet/desktop; the 1024px cut here
+   matches every other lg: breakpoint already used across this codebase. */
+.site-container {
+  width: 100%;
+  box-sizing: border-box;
+  padding-inline: 20px;
+}
+
+@media (min-width: 640px) {
+  .site-container {
+    padding-inline: 32px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .site-container {
+    padding-inline: 100px;
+  }
+}
+
 /* +50%, not -50%: under RTL, the track (wider than its band) rests flush
    against the band's *right* edge by default block layout, with item 1
    nearest that right edge and each later item further left — so the
@@ -81,7 +118,7 @@ body {
 }
 
 .animate-marquee {
-  animation: marquee-scroll 34s linear infinite;
+  animation: marquee-scroll 52s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -133,3 +170,82 @@ body {
     animation: none;
   }
 }
+
+/* Journey scenes (Hero → Pricing, the cinematic redesign): a slow,
+   continuous zoom on real photography — the classic "Ken Burns" technique
+   — used deliberately instead of any illustration or decorative motion,
+   since the photography itself is meant to carry the cinematic weight.
+   Applied via PhotoFrame's imgClassName so it scales only the <img> inside
+   its fixed, clipped frame, never the frame/shadow around it.
+   animation-fill-mode:forwards holds the zoomed-in end state rather than
+   resetting or looping — these photos stay on screen a while, and a
+   snap-back or repeat would read as a glitch, not a film. */
+@keyframes ken-burns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.06);
+  }
+}
+
+.animate-ken-burns {
+  animation: ken-burns 16s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-ken-burns {
+    animation: none;
+  }
+}
+
+/* One calm, one-shot fade+rise for every headline/caption across the
+   journey scenes — deliberately the same restrained treatment everywhere
+   (no bounce, no overshoot) so the scenes read as one continuous film
+   rather than a handful of different component demos stitched together. */
+@keyframes scene-text-in {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-scene-text-in {
+  animation: scene-text-in 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-scene-text-in {
+    animation: none;
+  }
+}
+
+/* Same entrance language as scene-text-in, with a touch more scale — for
+   the "poster" photography (JourneyCoffeeReveal, JourneyDiscoveries), which
+   benefits from a bit more physical presence arriving than a line of type
+   does. */
+@keyframes scene-photo-in {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-scene-photo-in {
+  animation: scene-photo-in 750ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-scene-photo-in {
+    animation: none;
+  }
+}
+

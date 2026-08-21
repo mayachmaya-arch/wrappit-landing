@@ -2,9 +2,11 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import HeroBackground from './components/HeroBackground';
 import Marquee from './components/Marquee';
-import ProblemSection from './components/ProblemSection';
-import GiftCollage from './components/GiftCollage';
-import HowItWorks from './components/HowItWorks';
+import JourneySpark from './components/JourneySpark';
+import JourneyPause from './components/JourneyPause';
+import JourneyCoffeeReveal from './components/JourneyCoffeeReveal';
+import JourneyDiscoveries from './components/JourneyDiscoveries';
+import JourneyBridge from './components/JourneyBridge';
 import Pricing from './components/Pricing';
 import Footer from './components/Footer';
 
@@ -13,40 +15,71 @@ function App() {
     <div dir="rtl" className="min-h-screen overflow-x-hidden bg-cream text-ink">
       {/* hero-viewport: min-height:100svh at every width, so only the hero
           and its marquee band are visible before the user scrolls, on
-          phones as much as desktop. overflow-x-hidden (not overflow-hidden)
-          so the ticker's
-          rotated band can bleed past the hero's bottom edge without being
-          clipped. hero-viewport itself carries no background color — the
-          dark backdrop lives only on the clipped wrapper below, so wherever
-          that wrapper stops, this page's own bg-cream (set on the root div
-          above) shows through directly. Nothing paints "next section
-          background" on purpose; it's just what's already behind everything. */}
-      <div className="hero-viewport relative flex flex-col overflow-x-hidden">
+          phones as much as desktop. hero-viewport itself carries no
+          background color — the dark backdrop lives only on the clipped
+          wrapper below, so wherever that wrapper stops, this page's own
+          bg-cream (set on the root div above) shows through directly.
+          Nothing paints "next section background" on purpose; it's just
+          what's already behind everything.
+
+          overflow-x-clip (not overflow-x-hidden) is deliberate: per the
+          CSS overflow spec, an element with overflow-x:hidden and no
+          explicit overflow-y has its overflow-y computed as auto, not
+          visible — a real, reproduced bug here (verified: hero-viewport's
+          scrollHeight exceeded its clientHeight by ~41px, exactly the
+          marquee band's rotated bottom-corner bleed past this element's
+          own box). That made hero-viewport an actual nested scroll
+          container with its own tiny scroll range, so a mouse-wheel/touch
+          scroll starting over the hero had to exhaust that ~41px of
+          internal scroll before the page scroll continued — read as the
+          scroll "sticking" right at the hero/next-section boundary.
+          overflow-x:clip clips the same horizontal overflow without ever
+          pairing with overflow-y, so overflow-y stays visible and the
+          band's intentional bottom bleed (needed for the clean hero
+          boundary) renders without creating any scrollable region. */}
+      <div className="hero-viewport relative flex flex-col overflow-x-clip">
         {/* Video + dark gradient, clipped to stop short of the hero's bottom
-            edge (see bottom-[4vw] below) instead of running the full inset-0
-            height. 4vw is proportional, not a fixed pixel patch: the purple
-            band is rotated -2.7deg at 120vw wide, so its far corners recede
-            from the hero's flat bottom edge by (0.6*100vw)*sin(2.7deg) ≈
-            2.83vw at any viewport width. Clipping the video short by 4vw
-            keeps a ~1.4x safety margin over that recession at every width,
-            while staying comfortably under the band's own thickness, so the
-            strip this reveals is always fully covered by the band except in
-            that receded sliver — where it now reveals the page's real cream
-            background instead of a manufactured patch. */}
-        <div className="absolute inset-x-0 top-0 bottom-[4vw] overflow-hidden bg-ink">
+            edge (see bottom-[0.6vw] below) instead of running the full
+            inset-0 height, so the sliver this reveals shows the page's real
+            cream background instead of a manufactured patch.
+
+            0.6vw is re-tuned for the current ticker (Marquee.jsx): that
+            band is a fixed-height rectangle (not scaled to the viewport)
+            rotated 1.35deg, so its rotation swing — the amount its lowest
+            covering point recedes from a flat line — is
+            (0.55*100vw)*sin(1.35deg) ≈ 1.296vw of *bounding-box* rise, but
+            the relevant quantity here is how much of the band's own
+            constant vertical offset from the fold (41px desktop) that
+            swing eats into, which shrinks in vw terms as the viewport
+            widens. 0.6vw keeps a positive, tested margin under that at
+            every required width up to 1920px (worst case ~0.84vw there) —
+            re-verify this value if Marquee's height, offset, or rotation
+            angle change again, since it's derived from those exact
+            numbers, not independent of them. */}
+        <div className="absolute inset-x-0 top-0 bottom-[0.6vw] overflow-hidden bg-ink">
           <HeroBackground />
           <div className="absolute inset-0 bg-gradient-to-l from-ink/10 via-ink/40 to-ink/70" />
         </div>
-        <div className="relative z-10 mx-auto flex w-full max-w-[1820px] flex-1 flex-col px-4 pt-4 sm:px-8 sm:pt-6">
+        <div className="site-container relative z-10 mx-auto flex max-w-[1820px] flex-1 flex-col pt-4 sm:pt-6">
           <Header />
           <Hero />
         </div>
         <Marquee />
       </div>
 
-      <ProblemSection />
-      <GiftCollage />
-      <HowItWorks />
+      {/* The cinematic journey: Hero → Pricing. Five short scenes, each one
+          emotional beat, continuing Hero's own dark-photo/overlaid-type
+          visual mode before settling into the lighter "poster on cream"
+          language for the discovery beats. Replaces the old
+          ProblemSection/StorySectionV2/GiftCollage/HowItWorks section
+          quartet entirely — recoverable from git history if ever needed,
+          not deleted from disk without a trace. */}
+      <JourneySpark />
+      <JourneyPause />
+      <JourneyCoffeeReveal />
+      <JourneyDiscoveries />
+      <JourneyBridge />
+
       <Pricing />
       <Footer />
     </div>

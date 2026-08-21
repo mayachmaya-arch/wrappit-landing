@@ -108,11 +108,7 @@ export default function Pricing() {
   return (
     <section id="pricing" aria-label="פרייסינג" className="mx-auto max-w-[1560px] px-4 py-16 sm:px-8 sm:py-20">
       <hgroup className="flex flex-col items-center gap-2 text-center">
-        <p className="text-sm font-bold text-pink">הצטרפו כעסק מייסד</p>
         <h2 className="text-2xl font-black sm:text-3xl">מסלול שמתאים לעסק שלכם</h2>
-        <p className="max-w-lg text-sm text-stone-500 sm:text-base">
-          200 העסקים הראשונים מקבלים את מסלול הפרו (₪99/חודש) בחינם למשך חצי שנה — ללא התחייבות
-        </p>
       </hgroup>
 
       <div className="mt-12 flex flex-col gap-8 pb-12 md:flex-row md:items-stretch">

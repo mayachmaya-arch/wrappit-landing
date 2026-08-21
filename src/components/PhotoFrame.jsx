@@ -5,6 +5,7 @@ export default function PhotoFrame({
   src,
   alt = '',
   className = '',
+  imgClassName = '',
   gradient = 'from-stone-300 via-stone-200 to-stone-300',
   rounded = 'rounded-2xl',
   style,
@@ -17,7 +18,7 @@ export default function PhotoFrame({
           src={src}
           alt={alt}
           loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover"
+          className={`absolute inset-0 h-full w-full object-cover ${imgClassName}`}
           onError={(e) => {
             e.currentTarget.style.display = 'none';
           }}
