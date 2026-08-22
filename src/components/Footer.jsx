@@ -1,3 +1,5 @@
+import WrappitLogo from './WrappitLogo';
+
 // Only real, working in-page sections — no invented social links or pages
 // that don't exist on this site (see README.md → "העלאת נכסים בעצמך" if a
 // real Instagram/Facebook/etc. URL is ever supplied, at which point a
@@ -16,7 +18,7 @@ export default function Footer() {
   return (
     <footer className="bg-ink px-4 py-10 text-cloud sm:px-8">
       <div className="mx-auto flex max-w-[1560px] flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <p className="font-logo text-2xl leading-none text-pink sm:text-3xl">Wrappit</p>
+        <WrappitLogo className="h-6 w-auto text-pink sm:h-7" />
 
         <nav aria-label="ניווט פוטר" className="flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium text-cloud/80">
           {FOOTER_LINKS.map((link) => (

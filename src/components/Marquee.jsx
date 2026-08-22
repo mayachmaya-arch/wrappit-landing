@@ -37,7 +37,7 @@ function RibbonIcon() {
 function MarqueeItem({ idea, ariaHidden = false }) {
   return (
     <span className="me-6 flex shrink-0 items-center gap-5" aria-hidden={ariaHidden}>
-      <span className="text-base font-black whitespace-nowrap text-cloud sm:text-2xl">{idea}</span>
+      <span className="text-base font-light whitespace-nowrap text-cloud sm:text-2xl">{idea}</span>
       <RibbonIcon />
     </span>
   );
