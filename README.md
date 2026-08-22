@@ -32,11 +32,13 @@ src/
     Header.jsx           נבר עליון: לוגו, ניווט, שתי כפתורי CTA
     HeroBackground.jsx   וידאו הרקע של ה-Hero (autoplay/loop/muted) + poster fallback
     Hero.jsx             כותרת מתחלפת (יום הולדת? / בר מצווה? / ...) + תת-כותרת + CTA
-    Marquee.jsx           הבאנר הסגול הנע עם רעיונות למתנה (חופף בין ה-Hero לתחילת ה-Journey)
-    Journey*.jsx          חמש "סצנות" קולנועיות בין ה-Hero לפרייסינג (ראו למטה)
+    Marquee.jsx           הבאנר הסגול הנע עם רעיונות למתנה (חופף בין ה-Hero לתחילת הסקשן הבא)
+    GiftForSection.jsx    "למי המתנה?" — לוגו גדל בגלילה + כרטיס עם typewriter + שתי ערימות קלפים נפרשות (ראו למטה)
+    Journey*.jsx          חמש "סצנות" קולנועיות בין GiftForSection לפרייסינג (ראו למטה)
     Pricing.jsx           3 מסלולי תמחור לעסקים
     Footer.jsx            פוטר: לינקים, רשתות חברתיות, קופירייט
     BridgeHeading.jsx     קומפוננטת "Wrappit + סלוגן" הקטנה שמגשרת בין הסקשנים
+    WrappitLogo.jsx        הלוגו האמיתי (SVG inline, fill="currentColor") — במקום טקסט בפונט Berkshire Swash
     PhotoFrame.jsx        עטיפת תמונה עם fallback גרדיאנט למקרה שהתמונה חסרה
   assets/fonts/           פונט "Reisinger Michal" (ראו "העלאת נכסים בעצמך")
   App.jsx                 הרכבת כל הסקשנים
@@ -45,7 +47,18 @@ src/
 
 **חשוב:** התמונות והווידאו נטענים דרך `public/` בנתיב מוחלט (`/images/...`, `/videos/...`), לא דרך `import` ב-JS. המשמעות: אין שום צורך לגעת בקוד כדי להחליף placeholder בקובץ אמיתי — מספיק להעלות קובץ עם אותו שם בדיוק לאותו נתיב, והוא ישתלב אוטומטית. פירוט מלא בסעיף "העלאת נכסים בעצמך".
 
-### קומפוננטות ה-Journey (בין ה-Hero לפרייסינג)
+### GiftForSection.jsx — "למי המתנה?" (בין ה-Hero ל-Journey)
+
+סקשן חדש, לא מחליף כלום — נוסף מיד אחרי ה-Hero, לפני חמש סצנות ה-Journey. משתמש בספריית `motion` (npm package `motion`, `import ... from 'motion/react'`) לאנימציות scroll-scrubbed — הספרייה החדשה היחידה בפרויקט, ומיושמת רק כאן.
+
+- **לוגו גדל בגלילה** — `WrappitLogo` עובר scale מ-0.5 עד 2.4 לפי `scrollYProgress` של הבלוק שלו (`useScroll({ target, offset: ["start end", "end start"] })`), לא אנימציית כניסה חד-פעמית.
+- **כרטיס "למי המתנה?"** — accordion פתוח כברירת מחדל (ניתן לסגור), טוגל "לאדם אחד / לכמה אנשים", ותיבת typewriter שמתחילה להקליד כשהכרטיס נכנס לתצוגה (`useInView`, פעם אחת) ואז לופ אינסופי בין 3 משפטי דוגמה.
+- **שתי ערימות קלפי מוצר** (3 מוצרים בכל צד, שונים בין הצדדים) שנפרשות כמו מניפה לפי scroll progress של הבלוק שלהן — הפריסה עצמה ממופה לחלון `[0.25, 0.75]` של אותו progress כדי שהקלפים יהיו פרושים במלואם בדיוק כשהכרטיס המרכזי ממורכז במסך.
+- כל האנימציות מכבדות `prefers-reduced-motion`: הלוגו נשאר בגודלו הסופי, הקלפים נחים ישר במיקום הפרוש הסופי שלהם (לא רק "בלי אנימציה" — גם לא ממשיכים להגיב לגלילה).
+
+**מגבלת תמונות (שוב):** 6 כרטיסי המוצר (יומן, כוס קפה, עציץ, נר, סבון, תיק בד) משתמשים ב-`PhotoFrame` עם `src` שמצביע לקבצים שעדיין לא קיימים (`public/images/product-*.jpg`, ראו הטבלה למטה) — נופלים אוטומטית ל-gradient placeholder עד שיועלו קבצים אמיתיים, בדיוק לפי מנגנון ה-fallback הקיים של `PhotoFrame.jsx`.
+
+### קומפוננטות ה-Journey (בין GiftForSection לפרייסינג)
 
 חמש סצנות קולנועיות, כל אחת פילת "רגע וואו" אחד, מוצגות לפי הסדר הזה:
 
@@ -101,6 +114,12 @@ Header, Hero, Marquee, חמש סצנות ה-Journey, פרייסינג, ופוט�
 | 7 | כרטיס בקולאז' הפתרון #1 (וגם בגלריה) | `public/images/gallery-photo-1.jpg` | דוגמה מהקובץ: [57ce50c5](https://www.figma.com/api/mcp/asset/57ce50c5-98e9-4392-96ad-ae79b7f703a4) |
 | 8 | כרטיס בקולאז' הפתרון #2 | `public/images/gallery-photo-2.jpg` | חלופה מהקובץ: [9a949bd8](https://www.figma.com/api/mcp/asset/9a949bd8-a559-4617-8bf1-ec6127cf7d09) |
 | 9 | כרטיס בקולאז' הפתרון #3 | `public/images/gallery-photo-3.jpg` | חלופה מהקובץ: [b29dd75f](https://www.figma.com/api/mcp/asset/b29dd75f-a8ad-4c0d-a836-ae458947911e) |
+| 10 | כרטיס מוצר בערימה הימנית — יומן עור (₪45) | `public/images/product-notebook.jpg` | אין עדיין — `GiftForSection.jsx` נופל ל-gradient placeholder עד שיועלה קובץ |
+| 11 | כרטיס מוצר בערימה הימנית — כוס קפה (₪35) | `public/images/product-mug.jpg` | אין עדיין — כנ"ל |
+| 12 | כרטיס מוצר בערימה הימנית — עציץ קטן (₪60) | `public/images/product-plant.jpg` | אין עדיין — כנ"ל |
+| 13 | כרטיס מוצר בערימה השמאלית — נר ריח (₪40) | `public/images/product-candle.jpg` | אין עדיין — כנ"ל |
+| 14 | כרטיס מוצר בערימה השמאלית — סבון בעבודת יד (₪25) | `public/images/product-soap.jpg` | אין עדיין — כנ"ל |
+| 15 | כרטיס מוצר בערימה השמאלית — תיק בד (₪55) | `public/images/product-tote.jpg` | אין עדיין — כנ"ל |
 
 תמונות השלבים ב"ככה זה עובד" (`HowItWorks.jsx`) הן כרגע placeholder-ים גרדיאנט מובנים בקוד (לא קבצים חיצוניים) — אם רוצים תמונות אמיתיות שם, אפשר להוסיף קבצים חדשים ב-`public/images/` ולעדכן את מערך `STEPS` ב-`HowItWorks.jsx` כדי שיטען אותם דרך `PhotoFrame`.
 
