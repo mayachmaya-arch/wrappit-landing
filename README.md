@@ -49,14 +49,14 @@ src/
 
 ### GiftForSection.jsx — "למי המתנה?" (בין ה-Hero ל-Journey)
 
-סקשן חדש, לא מחליף כלום — נוסף מיד אחרי ה-Hero, לפני חמש סצנות ה-Journey. משתמש בספריית `motion` (npm package `motion`, `import ... from 'motion/react'`) לאנימציות scroll-scrubbed — הספרייה החדשה היחידה בפרויקט, ומיושמת רק כאן.
+סקשן חדש, לא מחליף כלום — נוסף מיד אחרי ה-Hero, לפני חמש סצנות ה-Journey. משתמש בספריית `motion` (npm package `motion`, `import ... from 'motion/react'`) לאנימציית הלוגו הגדל בגלילה בלבד — הספרייה החדשה היחידה בפרויקט, ומיושמת רק שם. שני כרטיסי המוצר **לא** משתמשים ב-`motion` וב-`useScroll` בכלל — ראו למטה.
 
 - **לוגו גדל בגלילה** — `WrappitLogo` עובר scale מ-0.5 עד 2.4 לפי `scrollYProgress` של הבלוק שלו (`useScroll({ target, offset: ["start end", "end start"] })`), לא אנימציית כניסה חד-פעמית.
 - **כרטיס "למי המתנה?"** — accordion פתוח כברירת מחדל (ניתן לסגור), טוגל "לאדם אחד / לכמה אנשים", ותיבת typewriter שמתחילה להקליד כשהכרטיס נכנס לתצוגה (`useInView`, פעם אחת) ואז לופ אינסופי בין 3 משפטי דוגמה.
-- **שתי ערימות קלפי מוצר** (3 מוצרים בכל צד, שונים בין הצדדים) שנפרשות כמו מניפה לפי scroll progress של הבלוק שלהן — הפריסה עצמה ממופה לחלון `[0.25, 0.75]` של אותו progress כדי שהקלפים יהיו פרושים במלואם בדיוק כשהכרטיס המרכזי ממורכז במסך.
-- כל האנימציות מכבדות `prefers-reduced-motion`: הלוגו נשאר בגודלו הסופי, הקלפים נחים ישר במיקום הפרוש הסופי שלהם (לא רק "בלי אנימציה" — גם לא ממשיכים להגיב לגלילה).
+- **שני "סלוטים" של מוצרים** (3 מוצרים בכל צד, שונים בין הצדדים) — **לא** scroll-scrubbed. כל סלוט הוא `setInterval` פשוט (`useAutoAdvance`) שמקדם אינדקס בין 3 המוצרים; שלושתם מוצגים בו-זמנית כשכבות `absolute inset-0` חופפות בתוך מיכל בגובה/רוחב קבוע, וה-crossfade עצמו הוא מעבר CSS `opacity` נקי (700ms) — אין scroll listener מעורב בכלל בחלק הזה. הצד הימני מתקדם כל 4200ms, השמאלי כל 4900ms — משכים שונים בכוונה, כדי ששני הצדדים "יתפזרו" זה מזה עם הזמן ולא יתחלפו ביחד.
+- כל האנימציות מכבדות `prefers-reduced-motion`: הלוגו נשאר בגודלו הסופי, כל סלוט מוצר נשאר קפוא על המוצר הראשון שלו (ה-`setInterval` פשוט לא מופעל).
 
-**מגבלת תמונות (שוב):** 6 כרטיסי המוצר (יומן, כוס קפה, עציץ, נר, סבון, תיק בד) משתמשים ב-`PhotoFrame` עם `src` שמצביע לקבצים שעדיין לא קיימים (`public/images/product-*.jpg`, ראו הטבלה למטה) — נופלים אוטומטית ל-gradient placeholder עד שיועלו קבצים אמיתיים, בדיוק לפי מנגנון ה-fallback הקיים של `PhotoFrame.jsx`.
+**מגבלת תמונות:** כל 6 כרטיסי המוצר (ראו הטבלה למטה לשמות/ספקים/מחירים המעודכנים) משתמשים ב-`PhotoFrame` עם `src` שמצביע כרגע ל-placeholder זמני מ-Lorem Picsum (`https://picsum.photos/seed/wrappit-<id>/400/500`, seeded כדי שיישאר יציב בין רענונים) — לא ל-`public/images/product-*.jpg` מקומי. זה מכוון: תמונות המוצר האמיתיות עוד לא התקבלו (מגיעות אחת בכל הודעה), וההנחיה המפורשת היא להמתין לכל 6 התמונות האמיתיות לפני שמחליפים את ה-`src` לקובץ מקומי — לא להחליף אחת בכל פעם שהיא מגיעה.
 
 ### קומפוננטות ה-Journey (בין GiftForSection לפרייסינג)
 
@@ -114,14 +114,14 @@ Header, Hero, Marquee, חמש סצנות ה-Journey, פרייסינג, ופוט�
 | 7 | כרטיס בקולאז' הפתרון #1 (וגם בגלריה) | `public/images/gallery-photo-1.jpg` | דוגמה מהקובץ: [57ce50c5](https://www.figma.com/api/mcp/asset/57ce50c5-98e9-4392-96ad-ae79b7f703a4) |
 | 8 | כרטיס בקולאז' הפתרון #2 | `public/images/gallery-photo-2.jpg` | חלופה מהקובץ: [9a949bd8](https://www.figma.com/api/mcp/asset/9a949bd8-a559-4617-8bf1-ec6127cf7d09) |
 | 9 | כרטיס בקולאז' הפתרון #3 | `public/images/gallery-photo-3.jpg` | חלופה מהקובץ: [b29dd75f](https://www.figma.com/api/mcp/asset/b29dd75f-a8ad-4c0d-a836-ae458947911e) |
-| 10 | כרטיס מוצר בערימה הימנית — יומן עור (₪45) | `public/images/product-notebook.jpg` | אין עדיין — `GiftForSection.jsx` נופל ל-gradient placeholder עד שיועלה קובץ |
-| 11 | כרטיס מוצר בערימה הימנית — כוס קפה (₪35) | `public/images/product-mug.jpg` | אין עדיין — כנ"ל |
-| 12 | כרטיס מוצר בערימה הימנית — עציץ קטן (₪60) | `public/images/product-plant.jpg` | אין עדיין — כנ"ל |
-| 13 | כרטיס מוצר בערימה השמאלית — נר ריח (₪40) | `public/images/product-candle.jpg` | אין עדיין — כנ"ל |
-| 14 | כרטיס מוצר בערימה השמאלית — סבון בעבודת יד (₪25) | `public/images/product-soap.jpg` | אין עדיין — כנ"ל |
-| 15 | כרטיס מוצר בערימה השמאלית — תיק בד (₪55) | `public/images/product-tote.jpg` | אין עדיין — כנ"ל |
+| 10 | סלוט מוצר ימני #1 — ארגז ירקות טרי מהחקלאי, חקלאי הצפון (₪85) | `public/images/product-vegetables.jpg` | טרם התקבל — `GiftForSection.jsx` משתמש כרגע ב-placeholder של Lorem Picsum (`seed/wrappit-vegetables`) |
+| 11 | סלוט מוצר ימני #2 — תספורת מקצועית, סלון תמר (₪150) | `public/images/product-haircut.jpg` | טרם התקבל — placeholder `seed/wrappit-haircut` |
+| 12 | סלוט מוצר ימני #3 — שיעור גיטרה, סטודיו נגן (₪120) | `public/images/product-guitar.jpg` | טרם התקבל — placeholder `seed/wrappit-guitar` |
+| 13 | סלוט מוצר שמאלי #1 — סדנת קרמיקה, סטודיו חומר (₪220) | `public/images/product-pottery.jpg` | טרם התקבל — placeholder `seed/wrappit-pottery` |
+| 14 | סלוט מוצר שמאלי #2 — זר פרחים, עלה פרא (₪140) | `public/images/product-flowers.jpg` | טרם התקבל — placeholder `seed/wrappit-flowers` |
+| 15 | סלוט מוצר שמאלי #3 — עיסוי מפנק, קליניק רוטס (₪180) | `public/images/product-massage.jpg` | טרם התקבל — placeholder `seed/wrappit-massage` |
 
-תמונות השלבים ב"ככה זה עובד" (`HowItWorks.jsx`) הן כרגע placeholder-ים גרדיאנט מובנים בקוד (לא קבצים חיצוניים) — אם רוצים תמונות אמיתיות שם, אפשר להוסיף קבצים חדשים ב-`public/images/` ולעדכן את מערך `STEPS` ב-`HowItWorks.jsx` כדי שיטען אותם דרך `PhotoFrame`.
+כל 6 השורות למעלה ממתינות לתמונות אמיתיות שיישלחו בהודעות נפרדות — לפי ההנחיה, ה-`src` בקוד יוחלף לקובץ מקומי (`public/images/product-*.jpg`, בדיוק לפי השמות בטבלה) רק אחרי שכל 6 יתקבלו, לא אחת בכל פעם.
 
 אייקון המתנה בבאנר הנע, ואייקוני הרשתות החברתיות בפוטר, **לא** מיובאים מ-Figma — מומשו כ-SVG inline (ב-`Marquee.jsx` וב-`Footer.jsx` בהתאמה) כדי לא להעתיק אייקונים קנייניים. אם רוצה את המקור המדויק מ-Figma של אייקון המתנה: [5833b2b3](https://www.figma.com/api/mcp/asset/5833b2b3-9159-4f8a-ba41-914289c6b1ff).
 

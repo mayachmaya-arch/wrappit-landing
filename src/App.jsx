@@ -69,10 +69,11 @@ function App() {
       </div>
 
       {/* New: "who's the gift for" — a growing logo, then a card with a
-          viewport-triggered looping typewriter, flanked by two
-          scroll-scrubbed fanning card stacks. Added section, not a
-          replacement — everything below (the Journey scenes) is
-          unchanged and unreordered. */}
+          viewport-triggered looping typewriter, flanked by two product
+          slots that auto-crossfade between 3 products each on independent
+          timers (not scroll-driven). Added section, not a replacement —
+          everything below (the Journey scenes) is unchanged and
+          unreordered. */}
       <GiftForSection />
 
       {/* The cinematic journey: Hero → Pricing. Five short scenes, each one

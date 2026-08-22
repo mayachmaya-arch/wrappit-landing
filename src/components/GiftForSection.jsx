@@ -5,24 +5,80 @@ import WrappitLogo from './WrappitLogo';
 import useInView from '../hooks/useInView';
 
 // New section, inserted between the hero and the existing Journey scenes —
-// does not replace or reorder anything else. Two independent scroll-scrubbed
-// regions (own useScroll target each, per "based on scroll progress within
-// the relevant section, not global scroll position"): the logo grows across
-// its own block, then — separately — the two product-card stacks fan out
-// across theirs, with the "who's the gift for?" card sitting statically
-// between them the whole time.
+// does not replace or reorder anything else. The logo grows across its own
+// scroll-scrubbed block (still `motion`/useScroll, section-local progress);
+// the two product slots below it are deliberately NOT scroll-driven — each
+// side auto-crossfades between its 3 products on a plain setInterval/CSS
+// opacity transition, with the two sides running different interval lengths
+// so they drift out of sync with each other instead of flipping in lockstep.
 
+// Real product photography hasn't been delivered yet (pending, one image per
+// message from the user) — every slot below points at a themed Lorem Picsum
+// placeholder (seeded, so each stays stable across reloads) rather than a
+// local /images/product-*.jpg path. Per instruction this stays true for ALL
+// six products until all six real photos have arrived — swap `image` for a
+// local path per item only once every product has a confirmed real photo,
+// not one at a time as each arrives.
 const RIGHT_PRODUCTS = [
-  { id: 'notebook', name: 'יומן עור', price: 45, gradient: 'from-rose-100 via-amber-100 to-stone-200' },
-  { id: 'mug', name: 'כוס קפה', price: 35, gradient: 'from-amber-100 via-stone-100 to-rose-100' },
-  { id: 'plant', name: 'עציץ קטן', price: 60, gradient: 'from-emerald-100 via-stone-100 to-amber-100' },
+  {
+    id: 'vegetables',
+    name: 'ארגז ירקות טרי מהחקלאי',
+    vendor: 'חקלאי הצפון',
+    price: 85,
+    image: 'https://picsum.photos/seed/wrappit-vegetables/400/500',
+    gradient: 'from-emerald-100 via-lime-50 to-amber-100',
+  },
+  {
+    id: 'haircut',
+    name: 'תספורת מקצועית',
+    vendor: 'סלון תמר',
+    price: 150,
+    image: 'https://picsum.photos/seed/wrappit-haircut/400/500',
+    gradient: 'from-stone-200 via-rose-100 to-stone-100',
+  },
+  {
+    id: 'guitar',
+    name: 'שיעור גיטרה',
+    vendor: 'סטודיו נגן',
+    price: 120,
+    image: 'https://picsum.photos/seed/wrappit-guitar/400/500',
+    gradient: 'from-amber-100 via-stone-100 to-rose-100',
+  },
 ];
 
 const LEFT_PRODUCTS = [
-  { id: 'candle', name: 'נר ריח', price: 40, gradient: 'from-stone-200 via-rose-100 to-amber-100' },
-  { id: 'soap', name: 'סבון בעבודת יד', price: 25, gradient: 'from-amber-100 via-rose-100 to-stone-200' },
-  { id: 'tote', name: 'תיק בד', price: 55, gradient: 'from-stone-100 via-amber-100 to-rose-100' },
+  {
+    id: 'pottery',
+    name: 'סדנת קרמיקה',
+    vendor: 'סטודיו חומר',
+    price: 220,
+    image: 'https://picsum.photos/seed/wrappit-pottery/400/500',
+    gradient: 'from-stone-200 via-amber-100 to-rose-100',
+  },
+  {
+    id: 'flowers',
+    name: 'זר פרחים',
+    vendor: 'עלה פרא',
+    price: 140,
+    image: 'https://picsum.photos/seed/wrappit-flowers/400/500',
+    gradient: 'from-rose-100 via-stone-100 to-emerald-100',
+  },
+  {
+    id: 'massage',
+    name: 'עיסוי מפנק',
+    vendor: 'קליניק רוטס',
+    price: 180,
+    image: 'https://picsum.photos/seed/wrappit-massage/400/500',
+    gradient: 'from-stone-100 via-rose-100 to-amber-100',
+  },
 ];
+
+// Different interval per side (not a shared timer split by index) is what
+// makes the two sides visibly desynchronize over time instead of flipping
+// together — "alive," per spec, rather than mechanical.
+const RIGHT_INTERVAL_MS = 4200;
+const LEFT_INTERVAL_MS = 4900;
+const CROSSFADE_MS = 700;
 
 const EXAMPLE_PHRASES = [
   'אחותי בת 35, אוהבת קרמיקה וצומחים וחוגגת יום הולדת.',
@@ -125,71 +181,70 @@ function GrowingLogo() {
   );
 }
 
-function ProductCard({ product, index, total, side, progress, reducedMotion }) {
-  // Fan geometry: cards start nearly stacked (small rotation, ~0 offset)
-  // and spread as progress goes 0→1. `spread` alternates sign by index so
-  // the stack opens like a hand of cards rather than sliding as one block;
-  // `direction` (+1 right stack / -1 left stack) is what sends the right
-  // stack's cards rightward and the left stack's leftward — translateX is
-  // a physical (not logical/RTL-relative) transform, so this sign is fixed
-  // regardless of the page's own dir="rtl".
-  const centered = index - (total - 1) / 2; // e.g. for 3 cards: -1, 0, 1
-  const direction = side === 'right' ? 1 : -1;
-  const finalX = direction * (60 + index * 70);
-  const finalY = Math.abs(centered) * 18;
-  const finalRotate = direction * (10 + centered * 10);
-  // Hooks always run (rules of hooks) — only the *style actually applied*
-  // below branches on reducedMotion, so a scroll-driven fan (continuous
-  // motion tied to scroll position, exactly what prefers-reduced-motion is
-  // meant to suppress) never plays; reduced-motion users see every card
-  // already resting at its final fanned position instead.
-  const x = useTransform(progress, [0, 1], [0, finalX]);
-  const y = useTransform(progress, [0, 1], [0, finalY]);
-  const rotate = useTransform(progress, [0, 1], [direction * 2, finalRotate]);
+// Plain setInterval index cycling — no scroll listener involved at all.
+// Under reduced motion the index is simply never advanced, so the slot
+// freezes on its first product instead of continuing to auto-play (the same
+// "settle on a final state, don't just skip the animation" rule used
+// everywhere else in this file).
+function useAutoAdvance(count, intervalMs, reducedMotion) {
+  const [index, setIndex] = useState(0);
 
+  useEffect(() => {
+    if (reducedMotion || count <= 1) return undefined;
+    const id = setInterval(() => {
+      setIndex((prev) => (prev + 1) % count);
+    }, intervalMs);
+    return () => clearInterval(id);
+  }, [count, intervalMs, reducedMotion]);
+
+  return index;
+}
+
+// All three products in a slot are mounted simultaneously as full-size
+// absolutely-positioned layers; only `opacity` (a plain CSS transition, no
+// motion/JS involved) toggles which one reads as "showing." Both the
+// outgoing and incoming layer animate at once, so it's a real crossfade
+// (no gap of full transparency in between) rather than a hide-then-show cut
+// — the technique carried over from the site's earlier CollageLayer /
+// ArrivalCrossfade components. The wrapper needs an explicit fixed size
+// (h-*/w-* below) since every child is `absolute inset-0` and contributes
+// nothing to normal flow.
+function ProductLayer({ product, side, active }) {
   return (
-    <motion.div
-      className="absolute top-1/2 left-1/2 w-[130px] -translate-x-1/2 -translate-y-1/2 sm:w-[150px]"
-      style={
-        reducedMotion
-          ? { x: finalX, y: finalY, rotate: finalRotate, zIndex: total - index }
-          : { x, y, rotate, zIndex: total - index }
-      }
+    <div
+      className="absolute inset-0 transition-opacity ease-in-out"
+      style={{ opacity: active ? 1 : 0, transitionDuration: `${CROSSFADE_MS}ms` }}
+      aria-hidden={!active}
     >
-      <div className="relative">
+      <div className="relative h-full">
         <PhotoFrame
-          src={`/images/product-${product.id}.jpg`}
+          src={product.image}
           alt={product.name}
           gradient={product.gradient}
-          className="aspect-[3/4] w-full shadow-[0_16px_32px_rgba(31,40,52,0.16)]"
+          className="h-full w-full shadow-[0_16px_32px_rgba(31,40,52,0.16)]"
         />
         <span className="absolute top-2 rounded-full bg-cloud px-2.5 py-1 text-xs font-bold text-ink shadow-sm ltr:right-2 rtl:left-2">
           ₪{product.price}
         </span>
         <span
-          className="absolute -bottom-3 rounded-md bg-cloud px-2 py-1 text-[11px] font-semibold whitespace-nowrap text-ink shadow-sm ltr:-right-2 rtl:-left-2"
-          style={{ transform: `rotate(${side === 'right' ? -6 : 6}deg)` }}
+          className="absolute -bottom-4 flex flex-col items-center gap-0.5 rounded-md bg-cloud px-2 py-1 text-center shadow-sm ltr:-right-2 rtl:-left-2"
+          style={{ transform: `rotate(${side === 'right' ? -4 : 4}deg)` }}
         >
-          {product.name}
+          <span className="text-[11px] leading-none font-semibold whitespace-nowrap text-ink">{product.name}</span>
+          <span className="text-[10px] leading-none whitespace-nowrap text-stone-500">{product.vendor}</span>
         </span>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
-function CardStack({ products, side, progress, reducedMotion }) {
+function ProductSlot({ products, side, intervalMs, reducedMotion }) {
+  const activeIndex = useAutoAdvance(products.length, intervalMs, reducedMotion);
+
   return (
-    <div className="relative h-[220px] w-full sm:h-[260px]">
+    <div className="relative mx-auto h-[220px] w-[150px] sm:h-[260px] sm:w-[170px]">
       {products.map((product, index) => (
-        <ProductCard
-          key={product.id}
-          product={product}
-          index={index}
-          total={products.length}
-          side={side}
-          progress={progress}
-          reducedMotion={reducedMotion}
-        />
+        <ProductLayer key={product.id} product={product} side={side} active={index === activeIndex} />
       ))}
     </div>
   );
@@ -268,32 +323,32 @@ function WhoIsItForCard() {
   );
 }
 
-function FanningCards() {
-  const ref = useRef(null);
+function ProductSlots() {
   const [reducedMotion] = useState(
     () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   );
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
-  // The fan is centered on the card, so its own progress window is
-  // narrower than the full section — mapping input [0.25, 0.75] onto
-  // output [0, 1] means the spread happens across the *middle* of the
-  // scroll transit (cards closed while the card is still arriving/leaving,
-  // fully open while it's centered in view) rather than across the entire
-  // section, which would leave the cards fully spread long before/after
-  // the card itself is comfortably readable.
-  const fanProgress = useTransform(scrollYProgress, [0.25, 0.75], [0, 1], { clamp: true });
 
   return (
-    <div ref={ref} className="relative min-h-[130vh] bg-cream px-4 py-16 sm:px-8">
+    <div className="relative bg-cream px-4 py-16 sm:px-8">
       <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-10 lg:grid-cols-[1fr_auto_1fr] lg:gap-4">
         <div className="order-2 lg:order-1">
-          <CardStack products={LEFT_PRODUCTS} side="left" progress={fanProgress} reducedMotion={reducedMotion} />
+          <ProductSlot
+            products={LEFT_PRODUCTS}
+            side="left"
+            intervalMs={LEFT_INTERVAL_MS}
+            reducedMotion={reducedMotion}
+          />
         </div>
         <div className="order-1 lg:order-2">
           <WhoIsItForCard />
         </div>
         <div className="order-3">
-          <CardStack products={RIGHT_PRODUCTS} side="right" progress={fanProgress} reducedMotion={reducedMotion} />
+          <ProductSlot
+            products={RIGHT_PRODUCTS}
+            side="right"
+            intervalMs={RIGHT_INTERVAL_MS}
+            reducedMotion={reducedMotion}
+          />
         </div>
       </div>
     </div>
@@ -304,7 +359,7 @@ export default function GiftForSection() {
   return (
     <section aria-label="למי המתנה">
       <GrowingLogo />
-      <FanningCards />
+      <ProductSlots />
     </section>
   );
 }
