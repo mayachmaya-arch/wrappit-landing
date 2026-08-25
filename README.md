@@ -49,14 +49,21 @@ src/
 
 ### GiftForSection.jsx — "למי המתנה?" (בין ה-Hero ל-Journey)
 
-סקשן חדש, לא מחליף כלום — נוסף מיד אחרי ה-Hero, לפני חמש סצנות ה-Journey. משתמש בספריית `motion` (npm package `motion`, `import ... from 'motion/react'`) לאנימציית הלוגו הגדל בגלילה בלבד — הספרייה החדשה היחידה בפרויקט, ומיושמת רק שם. שני כרטיסי המוצר **לא** משתמשים ב-`motion` וב-`useScroll` בכלל — ראו למטה.
+סקשן חדש, לא מחליף כלום — נוסף מיד אחרי הבאנר הגולל העליון עם קטגוריות העסקים, לפני חמש סצנות ה-Journey. משתמש בספריית `motion` (npm package `motion`, `import ... from 'motion/react'`) לאנימציית הלוגו הגדל בגלילה ולנפילת ערימת המתנות — הספרייה החדשה היחידה בפרויקט, ומיושמת רק כאן. שלושת כרטיסי הפילטר **לא** משתמשים ב-`motion` בכלל — state רגיל של React.
 
-- **לוגו גדל בגלילה** — `WrappitLogo` עובר scale מ-0.5 עד 2.4 לפי `scrollYProgress` של הבלוק שלו (`useScroll({ target, offset: ["start end", "end start"] })`), לא אנימציית כניסה חד-פעמית.
-- **כרטיס "למי המתנה?"** — accordion פתוח כברירת מחדל (ניתן לסגור), טוגל "לאדם אחד / לכמה אנשים", ותיבת typewriter שמתחילה להקליד כשהכרטיס נכנס לתצוגה (`useInView`, פעם אחת) ואז לופ אינסופי בין 3 משפטי דוגמה.
-- **שני "סלוטים" של מוצרים** (3 מוצרים בכל צד, שונים בין הצדדים) — **לא** scroll-scrubbed. כל סלוט הוא `setInterval` פשוט (`useAutoAdvance`) שמקדם אינדקס בין 3 המוצרים; שלושתם מוצגים בו-זמנית כשכבות `absolute inset-0` חופפות בתוך מיכל בגובה/רוחב קבוע, וה-crossfade עצמו הוא מעבר CSS `opacity` נקי (700ms) — אין scroll listener מעורב בכלל בחלק הזה. הצד הימני מתקדם כל 4200ms, השמאלי כל 4900ms — משכים שונים בכוונה, כדי ששני הצדדים "יתפזרו" זה מזה עם הזמן ולא יתחלפו ביחד.
-- כל האנימציות מכבדות `prefers-reduced-motion`: הלוגו נשאר בגודלו הסופי, כל סלוט מוצר נשאר קפוא על המוצר הראשון שלו (ה-`setInterval` פשוט לא מופעל).
+ארבעה חלקים, מלמעלה למטה:
 
-**מגבלת תמונות:** כל 6 כרטיסי המוצר (ראו הטבלה למטה לשמות/ספקים/מחירים המעודכנים) משתמשים ב-`PhotoFrame` עם `src` שמצביע כרגע ל-placeholder זמני מ-Lorem Picsum (`https://picsum.photos/seed/wrappit-<id>/400/500`, seeded כדי שיישאר יציב בין רענונים) — לא ל-`public/images/product-*.jpg` מקומי. זה מכוון: תמונות המוצר האמיתיות עוד לא התקבלו (מגיעות אחת בכל הודעה), וההנחיה המפורשת היא להמתין לכל 6 התמונות האמיתיות לפני שמחליפים את ה-`src` לקובץ מקומי — לא להחליף אחת בכל פעם שהיא מגיעה.
+- **לוגו גדל בגלילה + טאגליין** — `WrappitLogo` עובר scale מ-0.5 עד 2.4 לפי `scrollYProgress` של הבלוק שלו (`useScroll({ target, offset: ["start end", "end start"] })`, לא אנימציית כניסה חד-פעמית), עם הכיתוב הסטטי "זה מה זה נחמד!" מתחתיו (לא גדל יחד עם הלוגו).
+- **שלושה כרטיסי פילטר** זה לצד זה (`FilterCards`, גריד עד 3 עמודות), כולם משתמשים באותו chrome משותף (`AccordionCardShell`):
+  - **"למי המתנה?"** — טוגל "לאדם אחד / לכמה אנשים", קו מפריד, ואז תיבת typewriter שמתחילה להקליד כשהכרטיס נכנס לתצוגה (`useInView`, פעם אחת) ולופ אינסופי בין 3 משפטי דוגמה.
+  - **"מה עוד חשוב?"** — מתג "דחוף להיום/מחר" (role="switch", כרגע ברירת מחדל "on"), ושתי שורות מתקפלות (עסקים לתמוך בהם / ערכים ומאפיינים) עם checkboxes — רק שורה אחת פתוחה בכל רגע (state יחיד `openRow`).
+  - **"מה התקציב?"** — `input[type=range]` בין ₪50 ל-₪1,000 (`accent-pink`), עם מספר גדול במרכז שמתעדכן בזמן אמת תוך כדי גרירה.
+- **ערימת המתנות (`GiftRevealStack`)** — 6 כרטיסי מתנה (תמונה + שם + שם עסק) נופלים לערימה "מבולגנת" בכוונה — מיקומי סיום קבועים מראש (`STACK_POSITIONS`, לא `Math.random()` בכל render, כדי שהפיזור יישאר עקבי בין טעינות) עם spring מדורג (`staggerChildren`) שמתחיל כשהערימה נכנסת לתצוגה (`useInView`, פעם אחת). התיבה הזו ממלאת כמעט את כל גובה המסך (`min-h-screen`). אחרי שהזמן המשוער לנחיתת כל הכרטיסים חולף (`setTimeout` מחושב לפי מספר הכרטיסים ומשך האנימציה — לא `onAnimationComplete`), שני כפתורי ה-CTA מופיעים מתחתיה במעבר CSS `opacity` נקי:
+  - **"וואו מגניב, אני רוצה לקנות מתנה"** (כפתור ראשי, ורוד) — מקשר לאותו `BUY_GIFT_URL` production (`gift-wish-unfold.vercel.app/discover`) ש-Hero.jsx/Header.jsx כבר מצביעים אליו, לא כתובת placeholder.
+  - **"רגע, תסביר לי עוד"** (כפתור outline) — **לא** קישור חיצוני; גולל בעדינות (`scrollIntoView({ behavior: 'smooth' })`) ל-`nextElementSibling` של הסקשן הזה בדף, כלומר לכל מה שממילא בא אחריו ב-DOM (כרגע: תחילת ה-Journey). זו הבחירה בכוונה — עדיין אין סקשן "ככה זה עובד" ייעודי (התוכן שלו עוד לא סוכם), אז זה לא מצביע לעוגן קשיח שממציא תוכן, אלא פשוט ל"מה שכבר בא אחר כך."
+- כל האנימציות מכבדות `prefers-reduced-motion`: הלוגו נשאר בגודלו הסופי, כרטיסי הערימה נחים ישר במיקומם הסופי (בלי falling), וכפתורי ה-CTA מופיעים מיד בלי להמתין לטיימר.
+
+**מגבלת תמונות:** כל 6 כרטיסי המתנה בערימה (ראו הטבלה למטה לשמות/ספקים המעודכנים) משתמשים ב-`PhotoFrame` עם `src` שמצביע כרגע ל-placeholder זמני מ-Lorem Picsum (`https://picsum.photos/seed/wrappit-<id>/400/500`, seeded כדי שיישאר יציב בין רענונים) — לא ל-`public/images/product-*.jpg` מקומי. זה מכוון: תמונות המוצר האמיתיות עוד לא התקבלו (מגיעות אחת בכל הודעה), וההנחיה המפורשת היא להמתין לכל 6 התמונות האמיתיות לפני שמחליפים את ה-`src` לקובץ מקומי — לא להחליף אחת בכל פעם שהיא מגיעה.
 
 ### קומפוננטות ה-Journey (בין GiftForSection לפרייסינג)
 
@@ -114,12 +121,12 @@ Header, Hero, Marquee, חמש סצנות ה-Journey, פרייסינג, ופוט�
 | 7 | כרטיס בקולאז' הפתרון #1 (וגם בגלריה) | `public/images/gallery-photo-1.jpg` | דוגמה מהקובץ: [57ce50c5](https://www.figma.com/api/mcp/asset/57ce50c5-98e9-4392-96ad-ae79b7f703a4) |
 | 8 | כרטיס בקולאז' הפתרון #2 | `public/images/gallery-photo-2.jpg` | חלופה מהקובץ: [9a949bd8](https://www.figma.com/api/mcp/asset/9a949bd8-a559-4617-8bf1-ec6127cf7d09) |
 | 9 | כרטיס בקולאז' הפתרון #3 | `public/images/gallery-photo-3.jpg` | חלופה מהקובץ: [b29dd75f](https://www.figma.com/api/mcp/asset/b29dd75f-a8ad-4c0d-a836-ae458947911e) |
-| 10 | סלוט מוצר ימני #1 — ארגז ירקות טרי מהחקלאי, חקלאי הצפון (₪85) | `public/images/product-vegetables.jpg` | טרם התקבל — `GiftForSection.jsx` משתמש כרגע ב-placeholder של Lorem Picsum (`seed/wrappit-vegetables`) |
-| 11 | סלוט מוצר ימני #2 — תספורת מקצועית, סלון תמר (₪150) | `public/images/product-haircut.jpg` | טרם התקבל — placeholder `seed/wrappit-haircut` |
-| 12 | סלוט מוצר ימני #3 — שיעור גיטרה, סטודיו נגן (₪120) | `public/images/product-guitar.jpg` | טרם התקבל — placeholder `seed/wrappit-guitar` |
-| 13 | סלוט מוצר שמאלי #1 — סדנת קרמיקה, סטודיו חומר (₪220) | `public/images/product-pottery.jpg` | טרם התקבל — placeholder `seed/wrappit-pottery` |
-| 14 | סלוט מוצר שמאלי #2 — זר פרחים, עלה פרא (₪140) | `public/images/product-flowers.jpg` | טרם התקבל — placeholder `seed/wrappit-flowers` |
-| 15 | סלוט מוצר שמאלי #3 — עיסוי מפנק, קליניק רוטס (₪180) | `public/images/product-massage.jpg` | טרם התקבל — placeholder `seed/wrappit-massage` |
+| 10 | כרטיס בערימת המתנות — ארגז ירקות טרי מהחקלאי, חקלאי הצפון | `public/images/product-vegetables.jpg` | טרם התקבל — `GiftForSection.jsx` משתמש כרגע ב-placeholder של Lorem Picsum (`seed/wrappit-vegetables`) |
+| 11 | כרטיס בערימת המתנות — תספורת מקצועית, סלון תמר | `public/images/product-haircut.jpg` | טרם התקבל — placeholder `seed/wrappit-haircut` |
+| 12 | כרטיס בערימת המתנות — שיעור גיטרה, סטודיו נגן | `public/images/product-guitar.jpg` | טרם התקבל — placeholder `seed/wrappit-guitar` |
+| 13 | כרטיס בערימת המתנות — סדנת קרמיקה, סטודיו חומר | `public/images/product-pottery.jpg` | טרם התקבל — placeholder `seed/wrappit-pottery` |
+| 14 | כרטיס בערימת המתנות — זר פרחים, עלה פרא | `public/images/product-flowers.jpg` | טרם התקבל — placeholder `seed/wrappit-flowers` |
+| 15 | כרטיס בערימת המתנות — עיסוי מפנק, קליניק רוטס | `public/images/product-massage.jpg` | טרם התקבל — placeholder `seed/wrappit-massage` |
 
 כל 6 השורות למעלה ממתינות לתמונות אמיתיות שיישלחו בהודעות נפרדות — לפי ההנחיה, ה-`src` בקוד יוחלף לקובץ מקומי (`public/images/product-*.jpg`, בדיוק לפי השמות בטבלה) רק אחרי שכל 6 יתקבלו, לא אחת בכל פעם.
 

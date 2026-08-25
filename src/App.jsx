@@ -68,11 +68,11 @@ function App() {
         <Marquee />
       </div>
 
-      {/* New: "who's the gift for" — a growing logo, then a card with a
-          viewport-triggered looping typewriter, flanked by two product
-          slots that auto-crossfade between 3 products each on independent
-          timers (not scroll-driven). Added section, not a replacement —
-          everything below (the Journey scenes) is unchanged and
+      {/* New: section 2 — a scroll-scrubbed growing logo, three filter
+          accordion cards (who's it for / what else matters / budget), then
+          a "gift reveal" pile of 6 cards falling into a deliberately messy
+          stack, followed by the two CTAs. Added section, not a replacement
+          — everything below (the Journey scenes) is unchanged and
           unreordered. */}
       <GiftForSection />
 
