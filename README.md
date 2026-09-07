@@ -32,11 +32,13 @@ src/
     Header.jsx           נבר עליון: לוגו, ניווט, שתי כפתורי CTA
     HeroBackground.jsx   וידאו הרקע של ה-Hero (autoplay/loop/muted) + poster fallback
     Hero.jsx             כותרת מתחלפת (יום הולדת? / בר מצווה? / ...) + תת-כותרת + CTA
-    Marquee.jsx           הבאנר הסגול הנע עם רעיונות למתנה (חופף בין ה-Hero לתחילת ה-Journey)
-    Journey*.jsx          חמש "סצנות" קולנועיות בין ה-Hero לפרייסינג (ראו למטה)
+    Marquee.jsx           הבאנר הסגול הנע עם רעיונות למתנה (חופף בין ה-Hero לתחילת הסקשן הבא)
+    GiftForSection.jsx    "למי המתנה?" — לוגו גדל בגלילה + כרטיס עם typewriter + שתי ערימות קלפים נפרשות (ראו למטה)
+    Journey*.jsx          חמש "סצנות" קולנועיות בין GiftForSection לפרייסינג (ראו למטה)
     Pricing.jsx           3 מסלולי תמחור לעסקים
     Footer.jsx            פוטר: לינקים, רשתות חברתיות, קופירייט
     BridgeHeading.jsx     קומפוננטת "Wrappit + סלוגן" הקטנה שמגשרת בין הסקשנים
+    WrappitLogo.jsx        הלוגו האמיתי (SVG inline, fill="currentColor") — במקום טקסט בפונט Berkshire Swash
     PhotoFrame.jsx        עטיפת תמונה עם fallback גרדיאנט למקרה שהתמונה חסרה
   assets/fonts/           פונט "Reisinger Michal" (ראו "העלאת נכסים בעצמך")
   App.jsx                 הרכבת כל הסקשנים
@@ -45,7 +47,25 @@ src/
 
 **חשוב:** התמונות והווידאו נטענים דרך `public/` בנתיב מוחלט (`/images/...`, `/videos/...`), לא דרך `import` ב-JS. המשמעות: אין שום צורך לגעת בקוד כדי להחליף placeholder בקובץ אמיתי — מספיק להעלות קובץ עם אותו שם בדיוק לאותו נתיב, והוא ישתלב אוטומטית. פירוט מלא בסעיף "העלאת נכסים בעצמך".
 
-### קומפוננטות ה-Journey (בין ה-Hero לפרייסינג)
+### GiftForSection.jsx — "למי המתנה?" (בין ה-Hero ל-Journey)
+
+סקשן חדש, לא מחליף כלום — נוסף מיד אחרי הבאנר הגולל העליון עם קטגוריות העסקים, לפני חמש סצנות ה-Journey. משתמש בספריית `motion` (npm package `motion`, `import ... from 'motion/react'`) לאנימציית הלוגו הגדל בגלילה ולנפילת ערימת המתנות — הספרייה החדשה היחידה בפרויקט, ומיושמת רק כאן. שלושת כרטיסי הפילטר **לא** משתמשים ב-`motion` בכלל — state רגיל של React.
+
+ארבעה חלקים, מלמעלה למטה:
+
+- **לוגו גדל בגלילה + טאגליין** — `WrappitLogo` עובר scale מ-0.5 עד 2.4 לפי `scrollYProgress` של הבלוק שלו (`useScroll({ target, offset: ["start end", "end start"] })`, לא אנימציית כניסה חד-פעמית), עם הכיתוב הסטטי "זה מה זה נחמד!" מתחתיו (לא גדל יחד עם הלוגו).
+- **שלושה כרטיסי פילטר** זה לצד זה (`FilterCards`, גריד עד 3 עמודות), כולם משתמשים באותו chrome משותף (`AccordionCardShell`):
+  - **"למי המתנה?"** — טוגל "לאדם אחד / לכמה אנשים", קו מפריד, ואז תיבת typewriter שמתחילה להקליד כשהכרטיס נכנס לתצוגה (`useInView`, פעם אחת) ולופ אינסופי בין 3 משפטי דוגמה.
+  - **"מה עוד חשוב?"** — מתג "דחוף להיום/מחר" (role="switch", כרגע ברירת מחדל "on"), ושתי שורות מתקפלות (עסקים לתמוך בהם / ערכים ומאפיינים) עם checkboxes — רק שורה אחת פתוחה בכל רגע (state יחיד `openRow`).
+  - **"מה התקציב?"** — `input[type=range]` בין ₪50 ל-₪1,000 (`accent-pink`), עם מספר גדול במרכז שמתעדכן בזמן אמת תוך כדי גרירה.
+- **ערימת המתנות (`GiftRevealStack`)** — 6 כרטיסי מתנה (תמונה + שם + שם עסק) נופלים לערימה "מבולגנת" בכוונה — מיקומי סיום קבועים מראש (`STACK_POSITIONS`, לא `Math.random()` בכל render, כדי שהפיזור יישאר עקבי בין טעינות) עם spring מדורג (`staggerChildren`) שמתחיל כשהערימה נכנסת לתצוגה (`useInView`, פעם אחת). התיבה הזו ממלאת כמעט את כל גובה המסך (`min-h-screen`). אחרי שהזמן המשוער לנחיתת כל הכרטיסים חולף (`setTimeout` מחושב לפי מספר הכרטיסים ומשך האנימציה — לא `onAnimationComplete`), שני כפתורי ה-CTA מופיעים מתחתיה במעבר CSS `opacity` נקי:
+  - **"וואו מגניב, אני רוצה לקנות מתנה"** (כפתור ראשי, ורוד) — מקשר לאותו `BUY_GIFT_URL` production (`gift-wish-unfold.vercel.app/discover`) ש-Hero.jsx/Header.jsx כבר מצביעים אליו, לא כתובת placeholder.
+  - **"רגע, תסביר לי עוד"** (כפתור outline) — **לא** קישור חיצוני; גולל בעדינות (`scrollIntoView({ behavior: 'smooth' })`) ל-`nextElementSibling` של הסקשן הזה בדף, כלומר לכל מה שממילא בא אחריו ב-DOM (כרגע: תחילת ה-Journey). זו הבחירה בכוונה — עדיין אין סקשן "ככה זה עובד" ייעודי (התוכן שלו עוד לא סוכם), אז זה לא מצביע לעוגן קשיח שממציא תוכן, אלא פשוט ל"מה שכבר בא אחר כך."
+- כל האנימציות מכבדות `prefers-reduced-motion`: הלוגו נשאר בגודלו הסופי, כרטיסי הערימה נחים ישר במיקומם הסופי (בלי falling), וכפתורי ה-CTA מופיעים מיד בלי להמתין לטיימר.
+
+**מגבלת תמונות:** כל 6 כרטיסי המתנה בערימה (ראו הטבלה למטה לשמות/ספקים המעודכנים) משתמשים ב-`PhotoFrame` עם `src` שמצביע כרגע ל-placeholder זמני מ-Lorem Picsum (`https://picsum.photos/seed/wrappit-<id>/400/500`, seeded כדי שיישאר יציב בין רענונים) — לא ל-`public/images/product-*.jpg` מקומי. זה מכוון: תמונות המוצר האמיתיות עוד לא התקבלו (מגיעות אחת בכל הודעה), וההנחיה המפורשת היא להמתין לכל 6 התמונות האמיתיות לפני שמחליפים את ה-`src` לקובץ מקומי — לא להחליף אחת בכל פעם שהיא מגיעה.
+
+### קומפוננטות ה-Journey (בין GiftForSection לפרייסינג)
 
 חמש סצנות קולנועיות, כל אחת פילת "רגע וואו" אחד, מוצגות לפי הסדר הזה:
 
@@ -101,8 +121,14 @@ Header, Hero, Marquee, חמש סצנות ה-Journey, פרייסינג, ופוט�
 | 7 | כרטיס בקולאז' הפתרון #1 (וגם בגלריה) | `public/images/gallery-photo-1.jpg` | דוגמה מהקובץ: [57ce50c5](https://www.figma.com/api/mcp/asset/57ce50c5-98e9-4392-96ad-ae79b7f703a4) |
 | 8 | כרטיס בקולאז' הפתרון #2 | `public/images/gallery-photo-2.jpg` | חלופה מהקובץ: [9a949bd8](https://www.figma.com/api/mcp/asset/9a949bd8-a559-4617-8bf1-ec6127cf7d09) |
 | 9 | כרטיס בקולאז' הפתרון #3 | `public/images/gallery-photo-3.jpg` | חלופה מהקובץ: [b29dd75f](https://www.figma.com/api/mcp/asset/b29dd75f-a8ad-4c0d-a836-ae458947911e) |
+| 10 | כרטיס בערימת המתנות — ארגז ירקות טרי מהחקלאי, חקלאי הצפון | `public/images/product-vegetables.jpg` | טרם התקבל — `GiftForSection.jsx` משתמש כרגע ב-placeholder של Lorem Picsum (`seed/wrappit-vegetables`) |
+| 11 | כרטיס בערימת המתנות — תספורת מקצועית, סלון תמר | `public/images/product-haircut.jpg` | טרם התקבל — placeholder `seed/wrappit-haircut` |
+| 12 | כרטיס בערימת המתנות — שיעור גיטרה, סטודיו נגן | `public/images/product-guitar.jpg` | טרם התקבל — placeholder `seed/wrappit-guitar` |
+| 13 | כרטיס בערימת המתנות — סדנת קרמיקה, סטודיו חומר | `public/images/product-pottery.jpg` | טרם התקבל — placeholder `seed/wrappit-pottery` |
+| 14 | כרטיס בערימת המתנות — זר פרחים, עלה פרא | `public/images/product-flowers.jpg` | טרם התקבל — placeholder `seed/wrappit-flowers` |
+| 15 | כרטיס בערימת המתנות — עיסוי מפנק, קליניק רוטס | `public/images/product-massage.jpg` | טרם התקבל — placeholder `seed/wrappit-massage` |
 
-תמונות השלבים ב"ככה זה עובד" (`HowItWorks.jsx`) הן כרגע placeholder-ים גרדיאנט מובנים בקוד (לא קבצים חיצוניים) — אם רוצים תמונות אמיתיות שם, אפשר להוסיף קבצים חדשים ב-`public/images/` ולעדכן את מערך `STEPS` ב-`HowItWorks.jsx` כדי שיטען אותם דרך `PhotoFrame`.
+כל 6 השורות למעלה ממתינות לתמונות אמיתיות שיישלחו בהודעות נפרדות — לפי ההנחיה, ה-`src` בקוד יוחלף לקובץ מקומי (`public/images/product-*.jpg`, בדיוק לפי השמות בטבלה) רק אחרי שכל 6 יתקבלו, לא אחת בכל פעם.
 
 אייקון המתנה בבאנר הנע, ואייקוני הרשתות החברתיות בפוטר, **לא** מיובאים מ-Figma — מומשו כ-SVG inline (ב-`Marquee.jsx` וב-`Footer.jsx` בהתאמה) כדי לא להעתיק אייקונים קנייניים. אם רוצה את המקור המדויק מ-Figma של אייקון המתנה: [5833b2b3](https://www.figma.com/api/mcp/asset/5833b2b3-9159-4f8a-ba41-914289c6b1ff).
 

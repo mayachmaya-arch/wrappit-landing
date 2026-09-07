@@ -1,3 +1,5 @@
+import WrappitLogo from './WrappitLogo';
+
 const NAV_LINKS = [
   { label: 'גלו מתנות מפתיעות', href: '#discover' },
   { label: 'המסלולים לעסקים', href: '#pricing' },
@@ -12,8 +14,8 @@ const OPEN_STORE_URL = 'https://gift-wish-unfold.vercel.app/business/onboarding?
 export default function Header() {
   return (
     <header className="relative z-20 flex w-full items-center justify-between gap-6 rounded-2xl py-3 drop-shadow-[0_6px_9px_rgba(0,0,0,0.05)] sm:py-6">
-      <a href="#top" className="shrink-0 font-logo text-[39px] leading-none text-cloud sm:text-4xl lg:text-5xl">
-        Wrappit
+      <a href="#top" className="shrink-0 text-cloud">
+        <WrappitLogo className="h-8 w-auto sm:h-9 lg:h-11" />
       </a>
 
       <nav

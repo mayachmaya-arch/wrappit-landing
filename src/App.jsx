@@ -2,6 +2,7 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import HeroBackground from './components/HeroBackground';
 import Marquee from './components/Marquee';
+import GiftForSection from './components/GiftForSection';
 import JourneySpark from './components/JourneySpark';
 import JourneyPause from './components/JourneyPause';
 import JourneyCoffeeReveal from './components/JourneyCoffeeReveal';
@@ -66,6 +67,14 @@ function App() {
         </div>
         <Marquee />
       </div>
+
+      {/* New: section 2 — a scroll-scrubbed growing logo, three filter
+          accordion cards (who's it for / what else matters / budget), then
+          a "gift reveal" pile of 6 cards falling into a deliberately messy
+          stack, followed by the two CTAs. Added section, not a replacement
+          — everything below (the Journey scenes) is unchanged and
+          unreordered. */}
+      <GiftForSection />
 
       {/* The cinematic journey: Hero → Pricing. Five short scenes, each one
           emotional beat, continuing Hero's own dark-photo/overlaid-type
