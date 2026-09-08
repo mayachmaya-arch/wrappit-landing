@@ -1,10 +1,5 @@
 import WrappitLogo from './WrappitLogo';
 
-const NAV_LINKS = [
-  { label: 'גלו מתנות מפתיעות', href: '#discover' },
-  { label: 'המסלולים לעסקים', href: '#pricing' },
-];
-
 // Production app (gift-wish-unfold): existing routes, not new pages —
 // /discover is the main swipe-based gift discovery screen, /business/onboarding
 // is the existing seller onboarding / create-store flow (src/App.tsx routes).
@@ -18,17 +13,10 @@ export default function Header() {
         <WrappitLogo className="h-8 w-auto sm:h-9 lg:h-11" />
       </a>
 
-      <nav
-        aria-label="ניווט ראשי"
-        className="hidden items-center gap-7 whitespace-nowrap text-base font-semibold text-cloud lg:flex"
-      >
-        {NAV_LINKS.map((link) => (
-          <a key={link.href} href={link.href} className="transition-opacity hover:opacity-80">
-            {link.label}
-          </a>
-        ))}
-      </nav>
-
+      {/* The middle nav row (page-section links) was removed along with the
+          sections it pointed to — with the page cut down to hero + the
+          logo/punchline moment + footer, there's nothing left to deep-link
+          to, and the two CTAs below already cover both real destinations. */}
       <div className="flex shrink-0 items-center gap-3 sm:gap-5">
         <a
           href={BUY_GIFT_URL}

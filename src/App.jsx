@@ -3,12 +3,6 @@ import Hero from './components/Hero';
 import HeroBackground from './components/HeroBackground';
 import Marquee from './components/Marquee';
 import GiftForSection from './components/GiftForSection';
-import JourneySpark from './components/JourneySpark';
-import JourneyPause from './components/JourneyPause';
-import JourneyCoffeeReveal from './components/JourneyCoffeeReveal';
-import JourneyDiscoveries from './components/JourneyDiscoveries';
-import JourneyBridge from './components/JourneyBridge';
-import Pricing from './components/Pricing';
 import Footer from './components/Footer';
 
 function App() {
@@ -68,28 +62,15 @@ function App() {
         <Marquee />
       </div>
 
-      {/* New: section 2 — a scroll-scrubbed growing logo, three filter
-          accordion cards (who's it for / what else matters / budget), then
-          a "gift reveal" pile of 6 cards falling into a deliberately messy
-          stack, followed by the two CTAs. Added section, not a replacement
-          — everything below (the Journey scenes) is unchanged and
-          unreordered. */}
+      {/* Section 2, deliberately cut down to just its top: a scroll-scrubbed
+          growing logo with a punchline underneath. Everything that used to
+          follow it on this page (filter cards, the falling gift-card pile,
+          both CTAs, and the five Journey scenes + Pricing below that) was
+          removed for a drastically simplified page — recoverable from git
+          history if any of it is needed again, not left dangling unused on
+          disk. */}
       <GiftForSection />
 
-      {/* The cinematic journey: Hero → Pricing. Five short scenes, each one
-          emotional beat, continuing Hero's own dark-photo/overlaid-type
-          visual mode before settling into the lighter "poster on cream"
-          language for the discovery beats. Replaces the old
-          ProblemSection/StorySectionV2/GiftCollage/HowItWorks section
-          quartet entirely — recoverable from git history if ever needed,
-          not deleted from disk without a trace. */}
-      <JourneySpark />
-      <JourneyPause />
-      <JourneyCoffeeReveal />
-      <JourneyDiscoveries />
-      <JourneyBridge />
-
-      <Pricing />
       <Footer />
     </div>
   );
