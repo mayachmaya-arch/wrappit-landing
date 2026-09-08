@@ -1,15 +1,18 @@
 import WrappitLogo from './WrappitLogo';
 
-// Only real, working in-page sections — no invented social links or pages
-// that don't exist on this site (see README.md → "העלאת נכסים בעצמך" if a
-// real Instagram/Facebook/etc. URL is ever supplied, at which point a
-// socials row can come back).
+// Only real, working destinations — no invented social links or pages that
+// don't exist. With the page cut down to hero + the logo/punchline moment,
+// the only real in-page anchor left is #top; the other two are the same
+// production gift-wish-unfold URLs Header.jsx/Hero.jsx already link to (see
+// README.md → "העלאת נכסים בעצמך" if a real Instagram/Facebook/etc. URL is
+// ever supplied, at which point a socials row can come back).
+const BUY_GIFT_URL = 'https://gift-wish-unfold.vercel.app/discover?source=landing';
+const OPEN_STORE_URL = 'https://gift-wish-unfold.vercel.app/business/onboarding?source=landing';
+
 const FOOTER_LINKS = [
   { label: 'בית', href: '#top' },
-  { label: 'מה שקיים היום', href: '#problem' },
-  { label: 'הפתרון שלנו', href: '#solution' },
-  { label: 'ככה זה עובד', href: '#how-it-works' },
-  { label: 'מחירים', href: '#pricing' },
+  { label: 'לקניית מתנה', href: BUY_GIFT_URL },
+  { label: 'לפתיחת חנות', href: OPEN_STORE_URL },
 ];
 
 export default function Footer() {
