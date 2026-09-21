@@ -126,11 +126,31 @@ body {
   }
 }
 
-/* caret-blink, crossfade-in, ken-burns, scene-text-in, and scene-photo-in
-   (the typewriter caret, GiftCollage/journey-photo crossfades, the Ken
-   Burns zoom, and the journey scenes' text/photo entrances) were removed
-   here along with every component that used them — the page was cut down
-   to hero + the logo/punchline moment + footer, so none of them still
-   apply anywhere. Recoverable from git history if a future section needs
-   the same techniques again. */
+/* Typewriter caret for GiftFiltersShowcase's cycling card title. */
+@keyframes caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.animate-caret {
+  animation: caret-blink 1s step-end infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-caret {
+    animation: none;
+  }
+}
+
+/* crossfade-in, ken-burns, scene-text-in, and scene-photo-in (the
+   GiftCollage/journey-photo crossfades, the Ken Burns zoom, and the journey
+   scenes' text/photo entrances) were removed here along with every
+   component that used them — recoverable from git history if a future
+   section needs the same techniques again. */
 

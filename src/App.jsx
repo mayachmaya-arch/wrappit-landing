@@ -3,6 +3,7 @@ import Hero from './components/Hero';
 import HeroBackground from './components/HeroBackground';
 import Marquee from './components/Marquee';
 import GiftForSection from './components/GiftForSection';
+import GiftFiltersShowcase from './components/GiftFiltersShowcase';
 import Footer from './components/Footer';
 
 function App() {
@@ -70,6 +71,14 @@ function App() {
           history if any of it is needed again, not left dangling unused on
           disk. */}
       <GiftForSection />
+
+      {/* New: replaces the earlier "3 filter cards side by side" concept —
+          one central card that auto-cycles through the same 3 states (who's
+          it for / what else matters / budget), each typed out letter by
+          letter, surrounded by floating gift stickers that shuffle in and
+          out on their own independent timer. Added after the growing logo,
+          not instead of it. */}
+      <GiftFiltersShowcase />
 
       <Footer />
     </div>
