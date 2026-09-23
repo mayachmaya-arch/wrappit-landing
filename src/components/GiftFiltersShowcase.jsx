@@ -2,10 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 
 // New section, added right after GiftForSection's growing logo (not a
-// replacement for it — that section is untouched). This is the "3 filter
-// cards side by side" concept from an earlier round, rebuilt as one central
-// card that auto-cycles through the same 3 states, surrounded by floating
-// gift "stickers" that shuffle in and out on their own independent timer.
+// replacement for it — that section is untouched). Center of the section:
+// 3 vertically-stacked accordion filter cards ("who's it for" / "budget" /
+// "what else matters") matching the real gift-wish-unfold app's guided
+// search box exactly (screenshots-driven rebuild — a self-contained copy
+// for this marketing page, no code shared with that app). Only one of the
+// 3 cards is open at a time. Surrounding it, floating gift "stickers"
+// shuffle in and out on their own independent timer — untouched by this
+// rebuild, see below.
 
 // ---------------------------------------------------------------------------
 // Floating gift stickers
@@ -88,12 +92,13 @@ const WIDE_X_RANGE = [8, 92];
 const Y_RANGE = [10, 90];
 
 // The card's own footprint (as % of the container) is measured live from
-// the DOM rather than guessed as a fixed percentage box — the card is
+// the DOM rather than guessed as a fixed percentage box — the card block is
 // w-full below sm (near enough 100% of the container's width there) but a
 // fixed max-w-md column above it, and that ratio also shifts continuously
 // between the sm and lg breakpoints as the container itself grows toward
 // max-w-5xl. A hardcoded percentage box matched only one of those widths at
-// a time; measuring avoids re-deriving it by hand for every breakpoint.
+// a time; measuring avoids re-deriving it by hand for every breakpoint. It
+// also automatically follows the block's real height as cards open/close.
 function measureCardKeepOut(containerEl, cardEl) {
   if (!containerEl || !cardEl) return null;
   const containerRect = containerEl.getBoundingClientRect();
@@ -109,18 +114,11 @@ function measureCardKeepOut(containerEl, cardEl) {
   // breathing room."
   //
   // Known, accepted gap: stickers refresh on their own independent timer
-  // rather than in lockstep with the card's state changes (by design — see
-  // useFloatingStickers above, and the brief this was built from explicitly
-  // asked for whichever is cleaner code, not synchronized clocks). A
-  // placement can therefore be measured against one card state and still be
-  // on screen once the card has already swapped to a taller/shorter one —
-  // the margin below absorbs a normal state's height change, but not the
-  // full swing between the shortest state (budget) and the tallest (who).
-  // Verified via scripted overlap sampling: this shows up in roughly 1 in
-  // 40-45 refreshes, only as a few px of edge touch (not a real collision),
-  // and self-corrects on the next refresh — not worth inflating the margin
-  // enough to cover every transition at the cost of shrinking the safe
-  // placement area for the common case.
+  // rather than in lockstep with which of the 3 cards is currently open (by
+  // design). A placement can therefore be measured against one card's open
+  // state and still be on screen once a different (taller/shorter) card has
+  // been opened — the margin below absorbs a normal height change, but not
+  // every possible swing. Self-corrects on the next sticker refresh.
   const marginX = 100;
   const marginY = 70;
   return {
@@ -223,7 +221,7 @@ function pickRandomStickers(keepOut, containerRect) {
   }));
 }
 
-// Independent timer from the central card's own cycle — simplest to reason
+// Independent timer from the central card's own state — simplest to reason
 // about as two unrelated intervals rather than coordinating a shared clock,
 // and it reads as more "alive" when they're not in lockstep anyway. Starts
 // empty and fills in on the first effect run (not a lazy useState
@@ -268,84 +266,179 @@ function GiftSticker({ name, image }) {
 }
 
 // ---------------------------------------------------------------------------
-// The central cycling card — same 3 states/interactivity as the earlier
-// 3-side-by-side cards, just shown one at a time.
+// The 3-card guided-search box — matches the real gift-wish-unfold app's
+// GuidedSearchOverlay screens exactly (rebuilt independently here, no
+// shared code). Only one of the 3 top-level cards is open at a time, same
+// as every reference screenshot.
 // ---------------------------------------------------------------------------
+
+// Shared chrome for all 3 top-level cards: header (title + chevron), an
+// optional single-line summary shown only while collapsed, and an
+// animated-height body. `title` can be a plain string or a node (the "who"
+// card passes in its partially-typed title) — `ariaLabel` gives screen
+// readers the real static label regardless of what's mid-typing visually.
+function AccordionCard({ title, ariaLabel, isOpen, onToggle, collapsedSubtitle, children }) {
+  return (
+    <div className="w-full rounded-3xl border border-stone-200 bg-white p-6 shadow-xl sm:p-8">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-label={ariaLabel}
+        className="flex w-full items-center justify-between gap-3 rounded-xl text-right focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:outline-none"
+      >
+        <span className="text-2xl font-black text-ink sm:text-3xl">{title}</span>
+        <svg
+          viewBox="0 0 20 20"
+          className={`size-5 shrink-0 text-ink transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          aria-hidden="true"
+        >
+          <path d="M5 7.5l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+
+      {!isOpen && collapsedSubtitle && (
+        <p className="mt-2 truncate text-right text-sm text-stone-500 sm:text-base">{collapsedSubtitle}</p>
+      )}
+
+      <div
+        className={`grid transition-[grid-template-rows] duration-300 ease-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+      >
+        <div className="overflow-hidden">
+          <div className="flex flex-col gap-4 pt-5">{children}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// role="switch" pill toggle — thumb rests at the reading-start edge via
+// rtl:/ltr: variants and slides to the opposite edge when on, matching the
+// screenshots (gray off, brand pink-coral on, circle moves left under RTL).
+function ToggleSwitch({ checked, onChange, label }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-sm font-bold text-ink sm:text-base">{label}</span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        onClick={() => onChange(!checked)}
+        className={`relative h-7 w-12 shrink-0 rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:outline-none ${checked ? 'bg-pink' : 'bg-stone-200'}`}
+      >
+        <span
+          className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow-sm transition-transform duration-200 ltr:left-0.5 rtl:right-0.5 ${
+            checked ? 'ltr:translate-x-5 rtl:-translate-x-5' : 'translate-x-0'
+          }`}
+        />
+      </button>
+    </div>
+  );
+}
+
+// Custom checkbox (not the native input) so it can match the screenshots
+// exactly: a filled pink-coral square with a white checkmark, not a
+// browser-default control merely tinted via accent-color.
+function Checkbox({ checked, onChange, label }) {
+  return (
+    // onClick lives on the <label>, not the inner span, so clicking the
+    // label text toggles it too (not just the square itself) — putting it
+    // on both would double-fire on a square click (span's own onClick,
+    // then the same click bubbling up to the label's), toggling back to
+    // where it started. Keyboard activation goes through the span's own
+    // onKeyDown instead, which never bubbles into the label's onClick.
+    <label className="flex cursor-pointer items-center gap-3" onClick={() => onChange(!checked)}>
+      <span
+        role="checkbox"
+        aria-checked={checked}
+        tabIndex={0}
+        onKeyDown={(event) => {
+          if (event.key === ' ' || event.key === 'Enter') {
+            event.preventDefault();
+            onChange(!checked);
+          }
+        }}
+        className={`flex size-6 shrink-0 items-center justify-center rounded-md border-2 transition-colors focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:outline-none ${
+          checked ? 'border-pink bg-pink' : 'border-stone-300 bg-white'
+        }`}
+      >
+        {checked && (
+          <svg viewBox="0 0 16 16" className="size-4 text-white" fill="none" aria-hidden="true">
+            <path d="M3.5 8.5l3 3 6-6.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
+      </span>
+      <span className="text-sm text-ink sm:text-base">{label}</span>
+    </label>
+  );
+}
+
+function summarizeSelection(selected) {
+  return selected.size > 0 ? Array.from(selected).join(', ') : 'לא נבחר';
+}
+
+// One of the 2 nested rows inside "מה עוד חשוב?" — its own title + a
+// dynamic inline summary + chevron, all on one line (unlike the top-level
+// cards, whose summary sits on its own line below). Only one of the 2 rows
+// is open at a time, controlled by the parent (WhatCard).
+function SubAccordionRow({ title, options, isOpen, onToggle, selected, onToggleOption }) {
+  return (
+    <div className="border-t border-stone-200 pt-3 first:border-t-0 first:pt-0">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center justify-between gap-3 rounded-lg text-right focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:outline-none"
+      >
+        <span className="shrink-0 text-sm font-bold text-ink sm:text-base">{title}</span>
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="truncate text-sm text-stone-500">{summarizeSelection(selected)}</span>
+          <svg
+            viewBox="0 0 20 20"
+            className={`size-4 shrink-0 text-ink transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+            fill="none"
+            aria-hidden="true"
+          >
+            <path d="M5 7.5l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+      </button>
+      <div
+        className={`grid transition-[grid-template-rows] duration-300 ease-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+      >
+        <div className="overflow-hidden">
+          <div className="flex flex-col gap-3 pt-3">
+            {options.map((option) => (
+              <Checkbox key={option} checked={selected.has(option)} onChange={() => onToggleOption(option)} label={option} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const RECIPIENT_OPTIONS = [
   { id: 'one', label: 'לאדם אחד' },
   { id: 'many', label: 'לכמה אנשים' },
 ];
 
-const EXAMPLE_PHRASES = [
-  'אחותי בת 35, אוהבת קרמיקה וצומחים וחוגגת יום הולדת.',
-  'הבוס שלי, אוהב יין ואוכל טוב, פורש אחרי 20 שנה.',
-  'החברה הכי טובה שלי, אוהבת קפה ותכשיטים, מתחתנת בקיץ.',
-];
+const WHO_TEXTAREA_PLACEHOLDER = 'למשל: אחותי בת 35, אוהבת קרמיקה וצמחים וחוגגת יום הולדת.';
 
-const EXAMPLE_TYPE_MS = 55;
-const EXAMPLE_DELETE_MS = 30;
-const EXAMPLE_HOLD_MS = 1400;
-
-// Same type→hold→delete→next loop used elsewhere on this page — starts as
-// soon as it mounts (this body only mounts while its state is the active
-// one, so mounting itself is the trigger; no viewport-gating needed here).
-function useLoopingTypewriter(phrases, reducedMotion) {
-  const [text, setText] = useState(reducedMotion ? phrases[0] : '');
-
-  useEffect(() => {
-    if (reducedMotion) return undefined;
-
-    let phraseIndex = 0;
-    let charIndex = 0;
-    let phase = 'typing';
-    let timeoutId;
-
-    function tick() {
-      const phrase = phrases[phraseIndex];
-
-      if (phase === 'typing') {
-        charIndex += 1;
-        setText(phrase.slice(0, charIndex));
-        if (charIndex >= phrase.length) {
-          phase = 'holding';
-          timeoutId = setTimeout(tick, EXAMPLE_HOLD_MS);
-          return;
-        }
-        timeoutId = setTimeout(tick, EXAMPLE_TYPE_MS);
-        return;
-      }
-
-      if (phase === 'holding') {
-        phase = 'deleting';
-        timeoutId = setTimeout(tick, EXAMPLE_DELETE_MS);
-        return;
-      }
-
-      charIndex -= 1;
-      setText(phrase.slice(0, charIndex));
-      if (charIndex <= 0) {
-        phraseIndex = (phraseIndex + 1) % phrases.length;
-        phase = 'typing';
-        timeoutId = setTimeout(tick, EXAMPLE_TYPE_MS);
-        return;
-      }
-      timeoutId = setTimeout(tick, EXAMPLE_DELETE_MS);
-    }
-
-    timeoutId = setTimeout(tick, EXAMPLE_TYPE_MS);
-    return () => clearTimeout(timeoutId);
-  }, [phrases, reducedMotion]);
-
-  return { text, showCaret: !reducedMotion };
-}
-
-function WhoBody({ reducedMotion }) {
+// The placeholder→real-text swap is just native <textarea placeholder>
+// behavior — no custom typing simulation needed here, unlike the block's
+// own title (see useTypedTitle near the bottom of this file).
+function WhoCard({ title, isOpen, onToggle }) {
   const [recipient, setRecipient] = useState('one');
-  const { text, showCaret } = useLoopingTypewriter(EXAMPLE_PHRASES, reducedMotion);
+  const [description, setDescription] = useState('');
 
   return (
-    <div className="flex flex-col gap-4">
+    <AccordionCard
+      title={title}
+      ariaLabel="למי המתנה?"
+      isOpen={isOpen}
+      onToggle={onToggle}
+      collapsedSubtitle={description || null}
+    >
       <div className="flex flex-col gap-2 text-right">
         <p className="text-sm font-bold text-stone-500">למי קונים?</p>
         <div className="flex w-fit gap-1 rounded-full bg-stone-100 p-1">
@@ -354,7 +447,7 @@ function WhoBody({ reducedMotion }) {
               key={option.id}
               type="button"
               onClick={() => setRecipient(option.id)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+              className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:outline-none ${
                 recipient === option.id ? 'bg-white text-ink shadow-sm' : 'bg-transparent text-stone-500'
               }`}
             >
@@ -370,84 +463,76 @@ function WhoBody({ reducedMotion }) {
         ספרו לנו עליו או עליה — גיל, הקשר ביניכם, תחביבים ומה חוגגים.
       </p>
 
-      <div
-        className="flex min-h-[76px] items-center rounded-2xl bg-stone-50 px-4 py-3 text-right text-sm text-ink sm:text-base"
+      <textarea
+        value={description}
+        onChange={(event) => setDescription(event.target.value)}
+        placeholder={WHO_TEXTAREA_PLACEHOLDER}
+        rows={3}
         dir="rtl"
-      >
-        <span>{text}</span>
-        {showCaret && <span className="animate-caret me-0.5 inline-block h-4 w-[2px] bg-ink" aria-hidden="true" />}
-      </div>
-    </div>
+        className="w-full resize-none rounded-2xl bg-stone-50 px-4 py-3 text-right text-sm text-ink placeholder:text-stone-400 focus-visible:ring-2 focus-visible:ring-ink focus-visible:outline-none sm:text-base"
+      />
+    </AccordionCard>
   );
 }
 
-// role="switch" pill toggle — thumb rests at the reading-start edge via
-// rtl:/ltr: variants and slides to the opposite edge when on, matching the
-// convention already used elsewhere on this page.
-function ToggleSwitch({ checked, onChange, label }) {
+const BUDGET_MIN = 50;
+const BUDGET_MAX = 1000;
+const BUDGET_DEFAULT = 500;
+const BUDGET_STEP = 10;
+
+// dir="ltr" on the slider itself (and its min/max labels) is deliberate,
+// matching the screenshots: ₪50 sits on the left, ₪1,000 on the right, dark
+// track filled from the left up to the thumb — a numeric slider kept
+// left-to-right even inside an otherwise fully RTL page, same convention
+// the real app uses. accent-ink (not accent-pink) matches the dark/navy
+// track color shown — `ink` is this project's near-navy dark token.
+function BudgetCard({ isOpen, onToggle }) {
+  const [budget, setBudget] = useState(BUDGET_DEFAULT);
+  const [touched, setTouched] = useState(false);
+
   return (
-    <div className="flex items-center justify-between gap-3">
-      <span className="text-sm font-bold text-ink sm:text-base">{label}</span>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        onClick={() => onChange(!checked)}
-        className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${checked ? 'bg-pink' : 'bg-stone-200'}`}
-      >
-        <span
-          className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow-sm transition-transform duration-200 ltr:left-0.5 rtl:right-0.5 ${
-            checked ? 'ltr:translate-x-5 rtl:-translate-x-5' : 'translate-x-0'
-          }`}
-        />
-      </button>
-    </div>
-  );
-}
-
-function CheckboxRow({ title, options, isOpen, onToggle, selected, onToggleOption }) {
-  return (
-    <div className="border-t border-stone-200 pt-3 first:border-t-0 first:pt-0">
-      <button type="button" onClick={onToggle} className="flex w-full items-center justify-between gap-3 text-right">
-        <span className="text-sm font-bold text-ink sm:text-base">{title}</span>
-        <svg
-          viewBox="0 0 20 20"
-          className={`size-4 shrink-0 text-ink transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
-          fill="none"
-          aria-hidden="true"
-        >
-          <path d="M5 7.5l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
-      <div
-        className={`grid transition-[grid-template-rows] duration-300 ease-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
-      >
-        <div className="overflow-hidden">
-          <div className="flex flex-col gap-2 pt-3">
-            {options.map((option) => (
-              <label key={option} className="flex items-center gap-2 text-sm text-ink sm:text-base">
-                <input
-                  type="checkbox"
-                  checked={selected.has(option)}
-                  onChange={() => onToggleOption(option)}
-                  className="size-4 accent-pink"
-                />
-                {option}
-              </label>
-            ))}
-          </div>
-        </div>
+    <AccordionCard
+      title="מה התקציב?"
+      isOpen={isOpen}
+      onToggle={onToggle}
+      collapsedSubtitle={touched ? `עד ${budget}₪` : 'בחרו תקציב'}
+    >
+      <input
+        type="range"
+        min={BUDGET_MIN}
+        max={BUDGET_MAX}
+        step={BUDGET_STEP}
+        value={budget}
+        dir="ltr"
+        onChange={(event) => {
+          setBudget(Number(event.target.value));
+          setTouched(true);
+        }}
+        className="w-full accent-ink focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:outline-none"
+        aria-label="תקציב כולל למתנה"
+      />
+      <div className="flex justify-between text-xs text-stone-400" dir="ltr">
+        <span>₪{BUDGET_MIN}</span>
+        <span>₪{BUDGET_MAX}</span>
       </div>
-    </div>
+      <div className="flex flex-col items-center gap-1 py-2">
+        <span className="text-4xl font-black text-ink sm:text-5xl">₪{budget}</span>
+        <p className="text-sm text-stone-500">תקציב כולל למתנה</p>
+      </div>
+    </AccordionCard>
   );
 }
 
-const SUPPORT_OPTIONS = ['עסקים מהצפון', 'עסקים מהדרום', 'עסקים של מילואימניקים'];
+const SUPPORT_OPTIONS = ['עסקים מהצפון', 'עסקים מהדרום', 'עסקים של משרתי/ות מילואים'];
 const VALUE_OPTIONS = ['עבודת יד', 'אקולוגי', 'טבעוני', 'אורגני'];
+const WHAT_PLACEHOLDER = 'העדפות וערכים';
 
-function WhatBody() {
-  const [urgent, setUrgent] = useState(true);
-  const [openRow, setOpenRow] = useState('support');
+// The card's own top-level summary combines both sub-rows' selections
+// (e.g. "אקולוגי, טבעוני"), falling back to the placeholder only once
+// nothing at all is selected in either row.
+function WhatCard({ isOpen, onToggle }) {
+  const [urgent, setUrgent] = useState(false);
+  const [openSubRow, setOpenSubRow] = useState(null);
   const [selectedSupport, setSelectedSupport] = useState(() => new Set());
   const [selectedValues, setSelectedValues] = useState(() => new Set());
 
@@ -462,139 +547,91 @@ function WhatBody() {
     };
   }
 
+  const combined = [...selectedSupport, ...selectedValues];
+  const collapsedSubtitle = combined.length > 0 ? combined.join(', ') : WHAT_PLACEHOLDER;
+
   return (
-    <div className="flex flex-col gap-4">
-      <ToggleSwitch checked={urgent} onChange={setUrgent} label="דחוף להיום/מחר" />
+    <AccordionCard title="מה עוד חשוב?" isOpen={isOpen} onToggle={onToggle} collapsedSubtitle={collapsedSubtitle}>
+      <ToggleSwitch checked={urgent} onChange={setUrgent} label="דחוף להיום / מחר" />
 
       <div className="flex flex-col">
-        <CheckboxRow
+        <SubAccordionRow
           title="עסקים שחשוב לי לתמוך בהם"
           options={SUPPORT_OPTIONS}
-          isOpen={openRow === 'support'}
-          onToggle={() => setOpenRow((prev) => (prev === 'support' ? null : 'support'))}
+          isOpen={openSubRow === 'support'}
+          onToggle={() => setOpenSubRow((prev) => (prev === 'support' ? null : 'support'))}
           selected={selectedSupport}
           onToggleOption={toggleInSet(setSelectedSupport)}
         />
-        <CheckboxRow
+        <SubAccordionRow
           title="ערכים ומאפיינים"
           options={VALUE_OPTIONS}
-          isOpen={openRow === 'values'}
-          onToggle={() => setOpenRow((prev) => (prev === 'values' ? null : 'values'))}
+          isOpen={openSubRow === 'values'}
+          onToggle={() => setOpenSubRow((prev) => (prev === 'values' ? null : 'values'))}
           selected={selectedValues}
           onToggleOption={toggleInSet(setSelectedValues)}
         />
       </div>
-    </div>
+    </AccordionCard>
   );
 }
 
-const BUDGET_MIN = 50;
-const BUDGET_MAX = 1000;
-const BUDGET_DEFAULT = 300;
-const BUDGET_STEP = 10;
+const WHO_TITLE = 'למי המתנה?';
+const TITLE_TYPE_MS = 55;
 
-function BudgetBody() {
-  const [budget, setBudget] = useState(BUDGET_DEFAULT);
-
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col items-center gap-1 py-2">
-        <span className="text-4xl font-black text-pink sm:text-5xl">₪{budget}</span>
-        <p className="text-sm text-stone-500">תקציב כולל למתנה</p>
-      </div>
-
-      <input
-        type="range"
-        min={BUDGET_MIN}
-        max={BUDGET_MAX}
-        step={BUDGET_STEP}
-        value={budget}
-        onChange={(event) => setBudget(Number(event.target.value))}
-        className="w-full accent-pink"
-        aria-label="תקציב כולל למתנה"
-      />
-      <div className="flex justify-between text-xs text-stone-400">
-        <span>₪{BUDGET_MIN}</span>
-        <span>₪{BUDGET_MAX}</span>
-      </div>
-    </div>
-  );
-}
-
-const CARD_STATES = [
-  { id: 'who', title: 'למי המתנה?', Body: WhoBody },
-  { id: 'what', title: 'מה עוד חשוב?', Body: WhatBody },
-  { id: 'budget', title: 'מה התקציב?', Body: BudgetBody },
-];
-
-const TITLE_TYPE_MS = 45;
-const CARD_HOLD_MS = 3500; // after the title finishes typing
-const CARD_FADE_MS = 500;
-
-// Orchestrates the whole cycle: type the active state's title letter by
-// letter, hold once typing finishes, fade the card out, then advance to the
-// next state (which mounts fresh — losing whatever the toggles/slider were
-// set to is fine here, this is an auto-playing showcase, not a saved form).
-function useCyclingCard(reducedMotion) {
-  const [index, setIndex] = useState(0);
-  const [typedLength, setTypedLength] = useState(() => (reducedMotion ? CARD_STATES[0].title.length : 0));
-  const [fadingOut, setFadingOut] = useState(false);
+// Fires once, the first time the 3-card block scrolls into view — used only
+// to trigger the "who" card's title typing below, independent from the
+// stickers' own timer and from any card's open/close state.
+function useOnceInView(ref, threshold = 0.2) {
+  const [inView, setInView] = useState(false);
 
   useEffect(() => {
-    if (reducedMotion) return undefined;
-    setFadingOut(false);
-    setTypedLength(0);
+    const node = ref.current;
+    if (!node) return undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [ref, threshold]);
 
-    let timeoutId;
+  return inView;
+}
+
+// Types `fullText` out once `trigger` turns true, then stops — a one-shot
+// "it's writing itself in" reveal for the search box's opening title, not a
+// looping/deleting effect like the old cycling card had.
+function useTypedTitle(fullText, trigger, reducedMotion) {
+  const [length, setLength] = useState(reducedMotion ? fullText.length : 0);
+  const startedRef = useRef(false);
+
+  useEffect(() => {
+    if (reducedMotion || !trigger || startedRef.current) return undefined;
+    startedRef.current = true;
+
     let charIndex = 0;
-    const title = CARD_STATES[index].title;
+    let timeoutId;
 
-    function typeTick() {
+    function tick() {
       charIndex += 1;
-      setTypedLength(charIndex);
-      if (charIndex < title.length) {
-        timeoutId = setTimeout(typeTick, TITLE_TYPE_MS);
-        return;
+      setLength(charIndex);
+      if (charIndex < fullText.length) {
+        timeoutId = setTimeout(tick, TITLE_TYPE_MS);
       }
-      timeoutId = setTimeout(() => {
-        setFadingOut(true);
-        timeoutId = setTimeout(() => {
-          setIndex((prev) => (prev + 1) % CARD_STATES.length);
-        }, CARD_FADE_MS);
-      }, CARD_HOLD_MS);
     }
 
-    timeoutId = setTimeout(typeTick, TITLE_TYPE_MS);
+    timeoutId = setTimeout(tick, TITLE_TYPE_MS);
     return () => clearTimeout(timeoutId);
-  }, [index, reducedMotion]);
+  }, [fullText, trigger, reducedMotion]);
 
-  return { index, typedLength, fadingOut };
+  return { length, done: length >= fullText.length };
 }
-
-function CentralCyclingCard({ reducedMotion, ref }) {
-  const { index, typedLength, fadingOut } = useCyclingCard(reducedMotion);
-  const state = CARD_STATES[index];
-  const showCaret = !reducedMotion && typedLength < state.title.length;
-  const Body = state.Body;
-
-  return (
-    <div
-      ref={ref}
-      className="relative z-10 w-full max-w-md rounded-3xl border border-stone-200 bg-white p-6 shadow-xl sm:p-8"
-      style={{ opacity: fadingOut ? 0 : 1, transition: `opacity ${CARD_FADE_MS}ms ease-in-out` }}
-    >
-      <h3 className="min-h-[2.5em] text-2xl font-black text-ink sm:min-h-[1.5em] sm:text-3xl">
-        {state.title.slice(0, typedLength)}
-        {showCaret && <span className="animate-caret me-0.5 inline-block h-6 w-[3px] bg-ink align-middle" aria-hidden="true" />}
-      </h3>
-      <div className="pt-5">
-        <Body reducedMotion={reducedMotion} />
-      </div>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
 
 export default function GiftFiltersShowcase() {
   const [reducedMotion] = useState(
@@ -604,11 +641,29 @@ export default function GiftFiltersShowcase() {
   const cardRef = useRef(null);
   const stickers = useFloatingStickers(reducedMotion, containerRef, cardRef);
 
+  // The 3 cards form one outer accordion too (only one open at a time) —
+  // every reference screenshot shows exactly one expanded, never two.
+  const [openCard, setOpenCard] = useState('who');
+  function toggleCard(id) {
+    setOpenCard((prev) => (prev === id ? null : id));
+  }
+
+  const blockInView = useOnceInView(cardRef);
+  const { length: whoTitleLength, done: whoTitleDone } = useTypedTitle(WHO_TITLE, blockInView, reducedMotion);
+  const whoTitle = (
+    <>
+      {WHO_TITLE.slice(0, whoTitleLength)}
+      {!reducedMotion && !whoTitleDone && (
+        <span className="animate-caret me-0.5 inline-block h-6 w-[3px] bg-ink align-middle" aria-hidden="true" />
+      )}
+    </>
+  );
+
   return (
     <section aria-label="מתאימים את המתנה בשבילכם" className="relative overflow-hidden bg-cream px-4 py-20 sm:py-28">
       <div
         ref={containerRef}
-        className="relative mx-auto flex min-h-[1300px] max-w-5xl items-center justify-center sm:min-h-[950px] lg:min-h-[820px]"
+        className="relative mx-auto flex min-h-[1600px] max-w-5xl items-center justify-center sm:min-h-[1150px] lg:min-h-[1000px]"
       >
         <AnimatePresence>
           {stickers.map((sticker) => (
@@ -627,7 +682,11 @@ export default function GiftFiltersShowcase() {
           ))}
         </AnimatePresence>
 
-        <CentralCyclingCard reducedMotion={reducedMotion} ref={cardRef} />
+        <div ref={cardRef} className="relative z-10 flex w-full max-w-md flex-col gap-4 sm:gap-6">
+          <WhoCard title={whoTitle} isOpen={openCard === 'who'} onToggle={() => toggleCard('who')} />
+          <BudgetCard isOpen={openCard === 'budget'} onToggle={() => toggleCard('budget')} />
+          <WhatCard isOpen={openCard === 'what'} onToggle={() => toggleCard('what')} />
+        </div>
       </div>
     </section>
   );
