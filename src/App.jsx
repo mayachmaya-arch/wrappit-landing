@@ -72,12 +72,15 @@ function App() {
           disk. */}
       <GiftForSection />
 
-      {/* New: replaces the earlier "3 filter cards side by side" concept —
-          one central card that auto-cycles through the same 3 states (who's
-          it for / what else matters / budget), each typed out letter by
-          letter, surrounded by floating gift stickers that shuffle in and
-          out on their own independent timer. Added after the growing logo,
-          not instead of it. */}
+      {/* Guided-search box: 3 vertically-stacked accordion filter cards
+          (who's it for / budget / what else matters), matching the real
+          gift-wish-unfold app's screens exactly — an independent rebuild
+          for this marketing page, no code shared between the two repos.
+          Only one of the 3 cards is open at a time; its "who" card title
+          types itself in once, the first time the block scrolls into view.
+          Surrounded by floating gift stickers that shuffle in and out on
+          their own independent timer. Added after the growing logo, not
+          instead of it. */}
       <GiftFiltersShowcase />
 
       <Footer />
